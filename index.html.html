@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lacul Micești — Rezervări</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2230;
+    --border: #2a3447;
+    --accent: #4e9e6b;
+    --accent2: #7bc4a0;
+    --water: #2e6b9e;
+    --water2: #5a9fd4;
+    --gold: #c9a227;
+    --text: #e8edf4;
+    --text2: #8b98b0;
+    --red: #e05c5c;
+    --orange: #d4844a;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+  /* LOADER */
+  #globalLoader {
+    position: fixed; inset: 0; background: rgba(13,17,23,0.85); backdrop-filter: blur(6px);
+    z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    transition: opacity 0.3s;
+  }
+  #globalLoader.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loaderMsg { color: var(--text2); font-size: 14px; }
+
+  /* SYNC INDICATOR */
+  #syncBar {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--water2));
+    z-index: 998; transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s; border-radius: 0 3px 3px 0;
+  }
+  #syncBar.active { transform: scaleX(1); }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 20px; font-size: 13px; z-index: 997;
+    transition: transform 0.3s; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: var(--accent); color: var(--accent2); }
+  #toast.error { border-color: var(--red); color: #f08080; }
+
+  header {
+    background: linear-gradient(135deg, #0a1628 0%, #0d2340 50%, #0a1628 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--water), var(--accent));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .logo-text h1 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; }
+  .logo-text p { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; }
+  .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  #syncStatus { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .btn {
+    padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .tabs {
+    display: flex; gap: 2px; padding: 16px 24px 0;
+    border-bottom: 1px solid var(--border); overflow-x: auto;
+  }
+  .tab {
+    padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--text2);
+    border: 1px solid transparent; border-bottom: none; transition: all 0.2s; white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); background: var(--surface2); }
+  .tab.active { color: var(--text); background: var(--surface); border-color: var(--border); border-bottom-color: var(--surface); margin-bottom: -1px; }
+
+  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .view-content { display: none; }
+  .view-content.active { display: block; }
+
+  /* CALENDAR */
+  .calendar-controls { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .month-nav { display: flex; align-items: center; gap: 12px; }
+  .month-nav button {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text); cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+  }
+  .month-nav button:hover { background: var(--border); }
+  .month-label { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; min-width: 200px; text-align: center; }
+  .calendar-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  .calendar-grid { min-width: 900px; }
+  .cal-header-row { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .cal-asset-label { padding: 10px 12px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; border-right: 1px solid var(--border); width: 160px; min-width: 160px; }
+  .cal-days-row { display: flex; flex: 1; }
+  .cal-day-header { flex: 1; min-width: 32px; text-align: center; padding: 6px 2px; font-size: 11px; color: var(--text2); border-right: 1px solid var(--border); }
+  .cal-day-header.today-col { color: var(--accent2); font-weight: 700; }
+  .cal-day-header.weekend { color: var(--water2); }
+  .cal-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); min-height: 44px; }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-asset-name { width: 160px; min-width: 160px; padding: 8px 12px; font-size: 13px; font-weight: 500; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .asset-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .cal-cells { display: flex; flex: 1; position: relative; }
+  .cal-cell { flex: 1; min-width: 32px; border-right: 1px solid rgba(42,52,71,0.5); cursor: pointer; transition: background 0.15s; }
+  .cal-cell:last-child { border-right: none; }
+  .cal-cell:hover { background: rgba(78,158,107,0.1); }
+  .cal-cell.today-col { background: rgba(78,158,107,0.05); }
+  .res-bar {
+    position: absolute; height: 28px; top: 8px; border-radius: 6px;
+    display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 600;
+    cursor: pointer; z-index: 5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: filter 0.15s, transform 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .res-bar:hover { filter: brightness(1.15); transform: scaleY(1.05); z-index: 10; }
+  .group-header { padding: 8px 14px; background: #1c2230; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #8b98b0; border-bottom: 1px solid #2a3447; }
+
+  /* LIST */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .filter-bar input, .filter-bar select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; }
+  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
+  .res-table { width: 100%; border-collapse: collapse; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  .res-table th { background: var(--surface2); padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
+  .res-table td { padding: 12px 14px; border-bottom: 1px solid rgba(42,52,71,0.5); font-size: 13px; vertical-align: middle; }
+  .res-table tr:last-child td { border-bottom: none; }
+  .res-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+  .badge-active { background: rgba(78,158,107,0.2); color: var(--accent2); }
+  .badge-upcoming { background: rgba(46,107,158,0.2); color: var(--water2); }
+  .badge-done { background: rgba(139,152,176,0.15); color: var(--text2); }
+  .badge-avans-ok { background: rgba(201,162,39,0.15); color: var(--gold); }
+  .badge-avans-no { background: rgba(224,92,92,0.15); color: var(--red); }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.25s; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-header h2 { font-family: 'Playfair Display', serif; font-size: 18px; }
+  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: var(--surface2); color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .modal-close:hover { background: var(--red); color: white; }
+  .modal-body { padding: 20px 24px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; }
+  input, select, textarea { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 70px; }
+  .form-check { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+  .form-check input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .stat-card .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .stat-card .value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--accent2); }
+  .stat-card .sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  .asset-group { margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .asset-group-header { padding: 10px 14px; background: var(--surface2); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); border-bottom: 1px solid var(--border); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+
+  .info-tooltip { position: fixed; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 12px; max-width: 260px; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.5); pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+  .info-tooltip.visible { opacity: 1; }
+  .info-tooltip p { margin-bottom: 4px; color: var(--text2); }
+  .info-tooltip strong { color: var(--text); }
+
+  .flex { display: flex; align-items: center; gap: 8px; }
+  .text-right { text-align: right; }
+  .text-center { text-align: center; }
+
+  .dot-cabana { background: #4e9e6b; }
+  .dot-ponton { background: #2e6b9e; }
+  .dot-sauna  { background: #c9622a; }
+  .dot-pensiune { background: #7a5cb8; }
+  .res-cabana { background: linear-gradient(90deg, #2e6647, #4e9e6b); color: #d4f5e3; }
+  .res-ponton { background: linear-gradient(90deg, #1a4a72, #2e6b9e); color: #c4e0f5; }
+  .res-sauna  { background: linear-gradient(90deg, #8a3f14, #c9622a); color: #f5d4b0; }
+  .res-pensiune { background: linear-gradient(90deg, #4a3280, #7a5cb8); color: #ddd0f5; }
+
+  @media (max-width: 640px) {
+    main { padding: 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    header { padding: 12px 16px; }
+    .tabs { padding: 12px 16px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- GLOBAL LOADER -->
+<div id="globalLoader">
+  <div class="spinner"></div>
+  <div id="loaderMsg">Se încarcă rezervările...</div>
+</div>
+
+<!-- SYNC BAR -->
+<div id="syncBar"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎣</div>
+    <div class="logo-text">
+      <h1>Lacul Micești</h1>
+      <p>Sistem Rezervări Live</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div id="syncStatus"><span class="sync-dot"></span> <span id="syncText">Sincronizat</span></div>
+    <button class="btn btn-secondary" onclick="loadReservations()">🔄 Refresh</button>
+    <button class="btn btn-secondary" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-primary" onclick="openModal()">＋ Rezervare nouă</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('calendar')">📅 Calendar</div>
+  <div class="tab" onclick="switchTab('list')">📋 Listă</div>
+  <div class="tab" onclick="switchTab('today')">🌅 Azi</div>
+  <div class="tab" onclick="switchTab('stats')">📊 Statistici</div>
+</div>
+
+<main>
+  <div id="view-calendar" class="view-content active">
+    <div class="calendar-controls">
+      <div class="month-nav">
+        <button onclick="prevMonth()">‹</button>
+        <span class="month-label" id="monthLabel"></span>
+        <button onclick="nextMonth()">›</button>
+      </div>
+      <button class="btn btn-secondary" onclick="goToday()">Azi</button>
+    </div>
+    <div class="calendar-wrap">
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+  </div>
+
+  <div id="view-list" class="view-content">
+    <div class="filter-bar">
+      <input type="text" id="searchInput" placeholder="🔍 Caută nume, asset..." oninput="renderList()">
+      <select id="filterAsset" onchange="renderList()">
+        <option value="">Toate asseturile</option>
+      </select>
+      <select id="filterStatus" onchange="renderList()">
+        <option value="">Toate statusurile</option>
+        <option value="active">Activ</option>
+        <option value="upcoming">Viitor</option>
+        <option value="done">Finalizat</option>
+      </select>
+      <select id="filterAvans" onchange="renderList()">
+        <option value="">Avans: toate</option>
+        <option value="yes">Avans plătit</option>
+        <option value="no">Fără avans</option>
+      </select>
+    </div>
+    <div id="listContainer"></div>
+  </div>
+
+  <div id="view-today" class="view-content">
+    <div id="todayContainer"></div>
+  </div>
+
+  <div id="view-stats" class="view-content">
+    <div id="statsContainer"></div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Rezervare nouă</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Asset *</label>
+          <select id="fAsset">
+            <optgroup label="🏠 Cabănuțe">
+              <option>Cabănuța 1</option><option>Cabănuța 2</option><option>Cabănuța 3</option>
+              <option>Cabănuța 4</option><option>Cabănuța 5</option><option>Cabănuța 6</option>
+              <option>Cabănuța 7</option><option>Cabănuța 8</option>
+            </optgroup>
+            <optgroup label="⛵ Pontoane">
+              <option>Ponton 1</option><option>Ponton 2</option><option>Ponton 3</option>
+            </optgroup>
+            <optgroup label="🔥 Wellness">
+              <option>Saună &amp; Ciubăr</option>
+            </optgroup>
+            <optgroup label="🛏 Pensiune">
+              <option>Camera 1</option><option>Camera 2</option><option>Camera 3</option>
+              <option>Camera 4</option><option>Camera 5</option><option>Camera 6</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Nume client *</label>
+          <input type="text" id="fNume" placeholder="Ex: Ion Popescu">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Telefon</label>
+          <input type="tel" id="fTel" placeholder="+40...">
+        </div>
+        <div class="form-group">
+          <label>Nr. persoane</label>
+          <input type="number" id="fPersoane" min="1" value="2">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Check-in *</label>
+          <input type="datetime-local" id="fCheckin">
+        </div>
+        <div class="form-group">
+          <label>Check-out *</label>
+          <input type="datetime-local" id="fCheckout">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Preț total (RON)</label>
+          <input type="number" id="fPret" min="0" placeholder="0" oninput="calcRest()">
+        </div>
+        <div class="form-group">
+          <label>Avans încasat (RON)</label>
+          <input type="number" id="fAvans" min="0" placeholder="0" oninput="calcRest()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rest de plată (auto)</label>
+          <input type="number" id="fRest" readonly placeholder="0" style="opacity:0.7">
+        </div>
+        <div class="form-group">
+          <label>Avans primit?</label>
+          <label class="form-check">
+            <input type="checkbox" id="fAvansOk">
+            <span>Da, avansul a fost primit</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Observații</label>
+          <textarea id="fNote" placeholder="Cerințe speciale, meniu, aranjamente..."></textarea>
+        </div>
+      </div>
+      <div id="fDays" style="font-size:13px;color:var(--accent2);font-weight:600;margin-top:4px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="btnDelete" onclick="deleteReservation()" style="display:none;margin-right:auto">🗑 Șterge</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Anulează</button>
+      <button class="btn btn-primary" id="btnSave" onclick="saveReservation()">💾 Salvează</button>
+    </div>
+  </div>
+</div>
+
+<div class="info-tooltip" id="tooltip"></div>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbwEMP72IyDQQYzoiVTlCpB7txuFaGJEk0L_uGxbVEC3Z7txOfV-e_dnd-VkaNAq3osi/exec';
+const AUTO_REFRESH_MS = 30000; // refresh automat la 30 secunde
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let reservations = [];
+let editingId = null;
+let calYear, calMonth;
+let refreshTimer = null;
+
+const MONTHS_RO = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+const DAYS_SHORT = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'];
+
+const ASSET_COLORS = {
+  cabana:   { dotClass: 'dot-cabana',   barClass: 'res-cabana' },
+  ponton:   { dotClass: 'dot-ponton',   barClass: 'res-ponton' },
+  sauna:    { dotClass: 'dot-sauna',    barClass: 'res-sauna'  },
+  pensiune: { dotClass: 'dot-pensiune', barClass: 'res-pensiune' },
+};
+
+const ALL_ASSETS = [
+  'Cabănuța 1','Cabănuța 2','Cabănuța 3','Cabănuța 4','Cabănuța 5','Cabănuța 6','Cabănuța 7','Cabănuța 8',
+  'Ponton 1','Ponton 2','Ponton 3',
+  'Saună & Ciubăr',
+  'Camera 1','Camera 2','Camera 3','Camera 4','Camera 5','Camera 6',
+];
+
+function getType(asset) {
+  if (asset.startsWith('Cabănuța')) return 'cabana';
+  if (asset.startsWith('Ponton'))   return 'ponton';
+  if (asset.startsWith('Saună'))    return 'sauna';
+  return 'pensiune';
+}
+
+// ═══════════════════════════════════════
+// API
+// ═══════════════════════════════════════
+function setSyncing(on) {
+  document.getElementById('syncBar').classList.toggle('active', on);
+  document.getElementById('syncText').textContent = on ? 'Sincronizare...' : 'Sincronizat';
+}
+
+async function apiGet() {
+  const resp = await fetch(API_URL + '?action=list&t=' + Date.now());
+  const json = await resp.json();
+  if (!json.ok) throw new Error(json.error || 'Eroare server');
+  return json.data;
+}
+
+async function apiPost(body) {
+  const resp = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  const json = await resp.json();
+  if (!json.ok) throw new Error(json.error || 'Eroare server');
+  return json;
+}
+
+async function loadReservations(silent = false) {
+  if (!silent) setSyncing(true);
+  try {
+    const data = await apiGet();
+    reservations = data.map(r => ({
+      ...r,
+      avansOk: r.avansOk === 'TRUE' || r.avansOk === true,
+      pret: parseFloat(r.pret) || 0,
+      avans: parseFloat(r.avans) || 0,
+      rest: parseFloat(r.rest) || 0,
+      persoane: parseInt(r.persoane) || 1,
+    })).filter(r => r.id);
+    refreshAll();
+    if (!silent) toast('✓ Date actualizate', 'success');
+  } catch(e) {
+    toast('⚠ Eroare la încărcare: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+    hideLoader();
+  }
+}
+
+function hideLoader() {
+  document.getElementById('globalLoader').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let toastTimer;
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+let currentTab = 'calendar';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['calendar','list','today','stats'][i] === tab);
+  });
+  document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  refreshCurrent();
+}
+
+function refreshAll() {
+  refreshCurrent();
+}
+
+function refreshCurrent() {
+  if (currentTab === 'calendar') renderCalendar();
+  if (currentTab === 'list')     renderList();
+  if (currentTab === 'today')    renderToday();
+  if (currentTab === 'stats')    renderStats();
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function openModal(id = null, preAsset = null, preDate = null) {
+  editingId = id;
+  document.getElementById('modalTitle').textContent = id ? 'Editează rezervarea' : 'Rezervare nouă';
+  document.getElementById('btnDelete').style.display = id ? 'flex' : 'none';
+
+  if (id) {
+    const r = reservations.find(x => x.id === id);
+    if (r) {
+      document.getElementById('fAsset').value = r.asset;
+      document.getElementById('fNume').value = r.nume;
+      document.getElementById('fTel').value = r.tel || '';
+      document.getElementById('fPersoane').value = r.persoane || 2;
+      document.getElementById('fCheckin').value = r.checkin;
+      document.getElementById('fCheckout').value = r.checkout;
+      document.getElementById('fPret').value = r.pret || '';
+      document.getElementById('fAvans').value = r.avans || '';
+      document.getElementById('fAvansOk').checked = r.avansOk || false;
+      document.getElementById('fNote').value = r.note || '';
+      calcRest();
+    }
+  } else {
+    document.getElementById('fAsset').value = preAsset || 'Cabănuța 1';
+    document.getElementById('fNume').value = '';
+    document.getElementById('fTel').value = '';
+    document.getElementById('fPersoane').value = 2;
+    const base = preDate ? new Date(preDate) : new Date();
+    base.setHours(14, 0, 0, 0);
+    document.getElementById('fCheckin').value = toLocalISO(base);
+    const out = new Date(base);
+    out.setDate(out.getDate() + 1); out.setHours(12, 0, 0, 0);
+    document.getElementById('fCheckout').value = toLocalISO(out);
+    document.getElementById('fPret').value = '';
+    document.getElementById('fAvans').value = '';
+    document.getElementById('fRest').value = '';
+    document.getElementById('fAvansOk').checked = false;
+    document.getElementById('fNote').value = '';
+    document.getElementById('fDays').textContent = '';
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('fNume').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  editingId = null;
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+function calcRest() {
+  const pret = parseFloat(document.getElementById('fPret').value) || 0;
+  const avans = parseFloat(document.getElementById('fAvans').value) || 0;
+  document.getElementById('fRest').value = Math.max(0, pret - avans) || '';
+  const ci = document.getElementById('fCheckin').value;
+  const co = document.getElementById('fCheckout').value;
+  if (ci && co) {
+    const diff = (new Date(co) - new Date(ci)) / 86400000;
+    document.getElementById('fDays').textContent = diff > 0 ? `📅 Durată: ${diff.toFixed(1)} zile` : '';
+  }
+}
+
+document.getElementById('fCheckin').addEventListener('change', calcRest);
+document.getElementById('fCheckout').addEventListener('change', calcRest);
+
+async function saveReservation() {
+  const asset   = document.getElementById('fAsset').value;
+  const nume    = document.getElementById('fNume').value.trim();
+  const checkin = document.getElementById('fCheckin').value;
+  const checkout= document.getElementById('fCheckout').value;
+
+  if (!asset || !nume || !checkin || !checkout) { toast('⚠ Completează câmpurile obligatorii', 'error'); return; }
+  if (new Date(checkout) <= new Date(checkin))   { toast('⚠ Check-out trebuie să fie după Check-in', 'error'); return; }
+
+  const pret  = parseFloat(document.getElementById('fPret').value)  || 0;
+  const avans = parseFloat(document.getElementById('fAvans').value) || 0;
+
+  const r = {
+    id: editingId || (Date.now().toString(36) + Math.random().toString(36).substr(2)),
+    asset, type: getType(asset), nume,
+    tel: document.getElementById('fTel').value.trim(),
+    persoane: parseInt(document.getElementById('fPersoane').value) || 1,
+    checkin, checkout, pret, avans,
+    rest: Math.max(0, pret - avans),
+    avansOk: document.getElementById('fAvansOk').checked,
+    note: document.getElementById('fNote').value.trim(),
+    createdAt: editingId ? (reservations.find(x => x.id === editingId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true; btn.textContent = '⏳ Se salvează...';
+  setSyncing(true);
+
+  try {
+    await apiPost({ action: 'save', reservation: r });
+    // Update local immediately
+    if (editingId) {
+      const idx = reservations.findIndex(x => x.id === editingId);
+      reservations[idx] = r;
+    } else {
+      reservations.push(r);
+    }
+    closeModal();
+    refreshAll();
+    toast('✓ Rezervare salvată!', 'success');
+  } catch(e) {
+    toast('⚠ Eroare la salvare: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salvează';
+    setSyncing(false);
+  }
+}
+
+async function deleteReservation() {
+  if (!editingId) return;
+  const r = reservations.find(x => x.id === editingId);
+  if (!confirm(`Ștergi rezervarea: ${r?.nume} — ${r?.asset}?`)) return;
+
+  setSyncing(true);
+  try {
+    await apiPost({ action: 'delete', id: editingId });
+    reservations = reservations.filter(x => x.id !== editingId);
+    closeModal(); refreshAll();
+    toast('✓ Rezervare ștearsă', 'success');
+  } catch(e) {
+    toast('⚠ Eroare la ștergere: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+// ═══════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════
+function initCalendar() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
+function prevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+function nextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+function goToday()   { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); renderCalendar(); }
+
+function renderCalendar() {
+  document.getElementById('monthLabel').textContent = `${MONTHS_RO[calMonth]} ${calYear}`;
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+
+  // Header
+  const hRow = document.createElement('div');
+  hRow.className = 'cal-header-row';
+  const lbl = document.createElement('div'); lbl.className = 'cal-asset-label'; lbl.textContent = 'Asset / Zi';
+  hRow.appendChild(lbl);
+  const dRow = document.createElement('div'); dRow.className = 'cal-days-row';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dt = new Date(calYear, calMonth, d);
+    const dow = (dt.getDay() + 6) % 7;
+    const isToday = dt.getTime() === today.getTime();
+    const dh = document.createElement('div');
+    dh.className = 'cal-day-header' + (isToday ? ' today-col' : '') + (dow >= 5 ? ' weekend' : '');
+    dh.innerHTML = `<div style="font-weight:700">${d}</div><div style="font-size:9px">${DAYS_SHORT[dow]}</div>`;
+    dRow.appendChild(dh);
+  }
+  hRow.appendChild(dRow);
+  grid.appendChild(hRow);
+
+  const groups = [
+    { label: '🏠 Cabănuțe', assets: ALL_ASSETS.slice(0,8) },
+    { label: '⛵ Pontoane', assets: ALL_ASSETS.slice(8,11) },
+    { label: '🔥 Wellness', assets: [ALL_ASSETS[11]] },
+    { label: '🛏 Pensiune', assets: ALL_ASSETS.slice(12) },
+  ];
+
+  groups.forEach(group => {
+    const gh = document.createElement('div'); gh.className = 'group-header'; gh.textContent = group.label;
+    grid.appendChild(gh);
+
+    group.assets.forEach(asset => {
+      const type = getType(asset);
+      const colors = ASSET_COLORS[type];
+      const row = document.createElement('div'); row.className = 'cal-row';
+
+      const nameCell = document.createElement('div'); nameCell.className = 'cal-asset-name';
+      nameCell.innerHTML = `<span class="asset-dot ${colors.dotClass}"></span><span style="font-size:12px">${asset}</span>`;
+      row.appendChild(nameCell);
+
+      const cells = document.createElement('div'); cells.className = 'cal-cells';
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dt = new Date(calYear, calMonth, d);
+        const isToday = dt.getTime() === today.getTime();
+        const cell = document.createElement('div');
+        cell.className = 'cal-cell' + (isToday ? ' today-col' : '');
+        cell.addEventListener('click', () => openModal(null, asset, new Date(calYear, calMonth, d)));
+        cells.appendChild(cell);
+      }
+
+      // Reservation bars
+      reservations.filter(r => r.asset === asset).forEach(res => {
+        const ci = new Date(res.checkin);
+        const co = new Date(res.checkout);
+        const mStart = new Date(calYear, calMonth, 1);
+        const mEnd   = new Date(calYear, calMonth, daysInMonth, 23, 59, 59);
+        if (ci > mEnd || co < mStart) return;
+
+        const startDay = ci >= mStart ? ci.getDate() : 1;
+        const endDay   = co <= mEnd   ? co.getDate() : daysInMonth;
+        const leftPct  = ((startDay - 1) / daysInMonth) * 100;
+        const widthPct = ((endDay - startDay + 1) / daysInMonth) * 100;
+
+        const bar = document.createElement('div');
+        bar.className = `res-bar ${colors.barClass}`;
+        bar.style.left  = `calc(${leftPct}% + 2px)`;
+        bar.style.width = `calc(${widthPct}% - 4px)`;
+        bar.textContent = res.nume;
+        bar.addEventListener('click', e => { e.stopPropagation(); openModal(res.id); });
+        bar.addEventListener('mouseenter', e => showTooltip(e, res));
+        bar.addEventListener('mousemove',  moveTooltip);
+        bar.addEventListener('mouseleave', hideTooltip);
+        cells.appendChild(bar);
+      });
+
+      row.appendChild(cells);
+      grid.appendChild(row);
+    });
+  });
+}
+
+// ═══════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════
+function showTooltip(e, r) {
+  const days = Math.round((new Date(r.checkout) - new Date(r.checkin)) / 86400000);
+  document.getElementById('tooltip').innerHTML = `
+    <strong>${r.nume}</strong><br>
+    <p>📱 ${r.tel||'N/A'} · 👥 ${r.persoane||'-'} pers.</p>
+    <p>📅 ${fmtFull(r.checkin)} → ${fmtFull(r.checkout)}</p>
+    <p>⏱ ${days} zile</p>
+    <p>💰 Total: ${r.pret} RON · Avans: ${r.avans} RON · Rest: ${r.rest} RON</p>
+    <p>${r.avansOk ? '✅ Avans încasat' : '⚠️ Avans neîncasat'}</p>
+    ${r.note ? `<p>📝 ${r.note}</p>` : ''}
+  `;
+  document.getElementById('tooltip').classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  const t = document.getElementById('tooltip');
+  t.style.left = Math.min(e.clientX + 14, window.innerWidth - 280) + 'px';
+  t.style.top  = Math.min(e.clientY + 14, window.innerHeight - 200) + 'px';
+}
+function hideTooltip() { document.getElementById('tooltip').classList.remove('visible'); }
+
+// ═══════════════════════════════════════
+// LIST
+// ═══════════════════════════════════════
+function renderList() {
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+  const fAsset  = document.getElementById('filterAsset').value;
+  const fStatus = document.getElementById('filterStatus').value;
+  const fAvans  = document.getElementById('filterAvans').value;
+  const now     = new Date();
+
+  const filtered = reservations.filter(r => {
+    if (search && !r.nume.toLowerCase().includes(search) && !r.asset.toLowerCase().includes(search)) return false;
+    if (fAsset && r.asset !== fAsset) return false;
+    if (fAvans === 'yes' && !r.avansOk) return false;
+    if (fAvans === 'no' && r.avansOk) return false;
+    const ci = new Date(r.checkin), co = new Date(r.checkout);
+    const st = ci <= now && co >= now ? 'active' : ci > now ? 'upcoming' : 'done';
+    if (fStatus && st !== fStatus) return false;
+    return true;
+  }).sort((a,b) => new Date(b.checkin) - new Date(a.checkin));
+
+  const el = document.getElementById('listContainer');
+  if (!filtered.length) { el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nicio rezervare găsită.</p></div>`; return; }
+
+  el.innerHTML = `<table class="res-table"><thead><tr>
+    <th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th>
+    <th class="text-center">Zile</th><th class="text-right">Total RON</th>
+    <th class="text-right">Avans</th><th class="text-right">Rest</th>
+    <th class="text-center">Avans</th><th class="text-center">Status</th><th></th>
+  </tr></thead><tbody>
+  ${filtered.map(r => {
+    const ci = new Date(r.checkin), co = new Date(r.checkout);
+    const days = Math.round((co - ci) / 86400000);
+    const colors = ASSET_COLORS[getType(r.asset)];
+    const st = ci <= now && co >= now ? 'active' : ci > now ? 'upcoming' : 'done';
+    const stBadge = st === 'active' ? '<span class="badge badge-active">● Activ</span>'
+      : st === 'upcoming' ? '<span class="badge badge-upcoming">▸ Viitor</span>'
+      : '<span class="badge badge-done">✓ Finalizat</span>';
+    return `<tr>
+      <td><span class="flex"><span class="asset-dot ${colors.dotClass}"></span>${r.asset}</span></td>
+      <td><div style="font-weight:500">${r.nume}</div>
+          ${r.tel ? `<div style="font-size:11px;color:var(--text2)">${r.tel}</div>` : ''}
+          ${r.persoane ? `<div style="font-size:11px;color:var(--text2)">👥 ${r.persoane} pers.</div>` : ''}</td>
+      <td>${fmtFull(r.checkin)}</td>
+      <td>${fmtFull(r.checkout)}</td>
+      <td class="text-center">${days}</td>
+      <td class="text-right">${r.pret ? r.pret.toLocaleString('ro-RO') : '—'}</td>
+      <td class="text-right">${r.avans ? r.avans.toLocaleString('ro-RO') : '—'}</td>
+      <td class="text-right" style="color:${r.rest>0?'var(--orange)':'var(--text2)'}">${r.rest ? r.rest.toLocaleString('ro-RO') : '0'}</td>
+      <td class="text-center">${r.avansOk ? '<span class="badge badge-avans-ok">✓ Da</span>' : '<span class="badge badge-avans-no">✗ Nu</span>'}</td>
+      <td class="text-center">${stBadge}</td>
+      <td><button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" onclick="openModal('${r.id}')">✏️</button></td>
+    </tr>`;
+  }).join('')}
+  </tbody></table>`;
+}
+
+// ═══════════════════════════════════════
+// TODAY
+// ═══════════════════════════════════════
+function renderToday() {
+  const now = new Date(); now.setHours(0,0,0,0);
+  const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
+
+  const checkins  = reservations.filter(r => { const d = new Date(r.checkin);  d.setHours(0,0,0,0); return d.getTime() === now.getTime(); });
+  const checkouts = reservations.filter(r => { const d = new Date(r.checkout); d.setHours(0,0,0,0); return d.getTime() === now.getTime(); });
+  const staying   = reservations.filter(r => { const ci = new Date(r.checkin); ci.setHours(0,0,0,0); const co = new Date(r.checkout); co.setHours(0,0,0,0); return ci < now && co > now; });
+  const tomorrow_ = reservations.filter(r => { const d = new Date(r.checkin);  d.setHours(0,0,0,0); return d.getTime() === tomorrow.getTime(); });
+
+  const todayStr = now.toLocaleDateString('ro-RO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  const section = (title, color, accent, list) => list.length === 0 ? '' : `
+    <div class="asset-group" style="margin-bottom:12px">
+      <div class="asset-group-header" style="color:${color};border-left:3px solid ${accent}">${title}</div>
+      ${list.map(r => {
+        const days = Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);
+        const colors = ASSET_COLORS[getType(r.asset)];
+        return `<div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span class="asset-dot ${colors.dotClass}" style="width:10px;height:10px"></span>
+          <div style="flex:1;min-width:180px">
+            <div style="font-weight:600">${r.asset}</div>
+            <div style="font-size:12px;color:var(--text2)">${r.nume}${r.tel?' · '+r.tel:''}${r.persoane?' · 👥 '+r.persoane:''}</div>
+          </div>
+          <div style="font-size:12px;color:var(--text2)">${fmtFull(r.checkin)} → ${fmtFull(r.checkout)} (${days}z)</div>
+          <div style="font-size:12px">${r.rest>0?`<span style="color:var(--orange)">💰 Rest: ${r.rest} RON</span>`:'<span style="color:var(--accent2)">✓ Achitat</span>'}</div>
+          ${r.note?`<div style="font-size:12px;color:var(--text2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}
+          <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" onclick="openModal('${r.id}')">✏️</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  document.getElementById('todayContainer').innerHTML = `
+    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:20px;color:var(--accent2)">
+      🌅 ${todayStr.charAt(0).toUpperCase()+todayStr.slice(1)}
+    </div>
+    <div class="stats-grid" style="margin-bottom:24px">
+      <div class="stat-card"><div class="label">Check-in azi</div><div class="value" style="color:var(--accent2)">${checkins.length}</div><div class="sub">sosiri</div></div>
+      <div class="stat-card"><div class="label">Check-out azi</div><div class="value" style="color:#f08080">${checkouts.length}</div><div class="sub">plecări</div></div>
+      <div class="stat-card"><div class="label">Ocupate azi</div><div class="value" style="color:var(--water2)">${staying.length+checkins.length}</div><div class="sub">assets</div></div>
+      <div class="stat-card"><div class="label">Check-in mâine</div><div class="value" style="color:var(--gold)">${tomorrow_.length}</div><div class="sub">de pregătit</div></div>
+    </div>
+    ${section('🚪 Check-out azi — curățenie necesară', '#f08080', 'var(--red)', checkouts)}
+    ${section('✅ Check-in azi — clienți care sosesc', 'var(--accent2)', 'var(--accent)', checkins)}
+    ${section('🛏 Cazați azi — rămân', 'var(--water2)', 'var(--water)', staying)}
+    ${section('📋 Check-in mâine — de pregătit', 'var(--gold)', 'var(--gold)', tomorrow_)}
+    ${!checkins.length && !checkouts.length && !staying.length ? '<div class="empty-state"><div class="icon">😌</div><p>Nicio activitate azi.</p></div>' : ''}
+  `;
+}
+
+// ═══════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════
+function renderStats() {
+  const now = new Date();
+  const thisMonth = reservations.filter(r => { const d = new Date(r.checkin); return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); });
+  const totalRev  = reservations.reduce((s,r) => s + (r.pret||0), 0);
+  const totalAvans= reservations.reduce((s,r) => s + (r.avans||0), 0);
+  const totalRest = reservations.reduce((s,r) => s + (r.rest||0), 0);
+  const active    = reservations.filter(r => new Date(r.checkin) <= now && new Date(r.checkout) >= now).length;
+  const upcoming  = reservations.filter(r => new Date(r.checkin) > now).length;
+  const assetCnt  = {};
+  ALL_ASSETS.forEach(a => assetCnt[a] = 0);
+  reservations.forEach(r => assetCnt[r.asset] = (assetCnt[r.asset]||0)+1);
+  const maxCnt = Math.max(...Object.values(assetCnt), 1);
+
+  document.getElementById('statsContainer').innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">Total rezervări</div><div class="value">${reservations.length}</div><div class="sub">${thisMonth.length} luna aceasta</div></div>
+      <div class="stat-card"><div class="label">Active acum</div><div class="value" style="color:var(--accent2)">${active}</div><div class="sub">${upcoming} viitoare</div></div>
+      <div class="stat-card"><div class="label">Venituri totale</div><div class="value" style="font-size:20px">${totalRev.toLocaleString('ro-RO')} RON</div><div class="sub">Avans: ${totalAvans.toLocaleString('ro-RO')} RON</div></div>
+      <div class="stat-card"><div class="label">Rest de încasat</div><div class="value" style="color:var(--orange);font-size:20px">${totalRest.toLocaleString('ro-RO')} RON</div><div class="sub">de la ${reservations.filter(r=>r.rest>0).length} rezervări</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="asset-group">
+        <div class="asset-group-header">📊 Rezervări per asset</div>
+        ${ALL_ASSETS.map(a => {
+          const cnt = assetCnt[a]||0;
+          const colors = ASSET_COLORS[getType(a)];
+          return `<div style="padding:10px 14px;border-bottom:1px solid rgba(42,52,71,0.4);display:flex;align-items:center;gap:10px">
+            <span class="asset-dot ${colors.dotClass}"></span>
+            <span style="flex:1;font-size:13px">${a}</span>
+            <div style="width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+              <div style="height:100%;width:${cnt/maxCnt*100}%;background:${colors.dotClass.replace('dot-','') === 'cabana'?'#4e9e6b':colors.dotClass.replace('dot-','') === 'ponton'?'#2e6b9e':colors.dotClass.replace('dot-','') === 'sauna'?'#c9622a':'#7a5cb8'};border-radius:3px"></div>
+            </div>
+            <span style="font-size:13px;font-weight:600;min-width:20px;text-align:right">${cnt}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="asset-group">
+        <div class="asset-group-header">📅 Luna ${MONTHS_RO[now.getMonth()]}</div>
+        ${thisMonth.length === 0 ? '<div class="empty-state" style="padding:30px"><p>Nicio rezervare.</p></div>' :
+          thisMonth.sort((a,b) => new Date(a.checkin)-new Date(b.checkin)).map(r => {
+            const colors = ASSET_COLORS[getType(r.asset)];
+            return `<div style="padding:10px 14px;border-bottom:1px solid rgba(42,52,71,0.4);display:flex;align-items:center;gap:10px">
+              <span class="asset-dot ${colors.dotClass}"></span>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500">${r.asset} — ${r.nume}</div>
+              <div style="font-size:11px;color:var(--text2)">${fmtDate(r.checkin)} → ${fmtDate(r.checkout)}</div></div>
+              <span style="font-size:13px;color:var(--accent2)">${r.pret?r.pret+' RON':'—'}</span>
+            </div>`;
+          }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function toLocalISO(d) {
+  const p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fmtDate(dt) {
+  if (!dt) return '—';
+  return new Date(dt).toLocaleDateString('ro-RO', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+function fmtFull(dt) {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  return d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
+}
+
+function exportCSV() {
+  const h = ['ID','Asset','Tip','Nume','Telefon','Persoane','Check-in','Check-out','Zile','Total','Avans','Rest','Avans OK','Note','Creat'];
+  const rows = reservations.map(r => {
+    const days = Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);
+    return [r.id,r.asset,r.type,r.nume,r.tel||'',r.persoane||'',r.checkin,r.checkout,days,r.pret||0,r.avans||0,r.rest||0,r.avansOk?'Da':'Nu',r.note||'',r.createdAt];
+  });
+  const csv = [h,...rows].map(row => row.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'})),download:`rezervari_${new Date().toISOString().slice(0,10)}.csv`});
+  a.click();
+}
+
+function populateFilters() {
+  const sel = document.getElementById('filterAsset');
+  [
+    {label:'Cabănuțe', assets: ALL_ASSETS.slice(0,8)},
+    {label:'Pontoane', assets: ALL_ASSETS.slice(8,11)},
+    {label:'Wellness', assets: [ALL_ASSETS[11]]},
+    {label:'Pensiune', assets: ALL_ASSETS.slice(12)},
+  ].forEach(g => {
+    const og = document.createElement('optgroup'); og.label = g.label;
+    g.assets.forEach(a => { const o = document.createElement('option'); o.value = o.textContent = a; og.appendChild(o); });
+    sel.appendChild(og);
+  });
+}
+
+// ═══════════════════════════════════════
+// AUTO-REFRESH
+// ═══════════════════════════════════════
+function startAutoRefresh() {
+  refreshTimer = setInterval(() => loadReservations(true), AUTO_REFRESH_MS);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+populateFilters();
+initCalendar();
+loadReservations().then(() => startAutoRefresh());
+</script>
+</body>
+</html>
