@@ -2,1003 +2,1036 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lacul Micești — Rezervări</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lacul Micești v0.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface2: #1c2230;
-    --border: #2a3447;
-    --accent: #4e9e6b;
-    --accent2: #7bc4a0;
-    --water: #2e6b9e;
-    --water2: #5a9fd4;
-    --gold: #c9a227;
-    --text: #e8edf4;
-    --text2: #8b98b0;
-    --red: #e05c5c;
-    --orange: #d4844a;
-    --radius: 10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+:root{--bg:#0d1117;--sf:#161b22;--sf2:#1c2230;--bd:#2a3447;--ac:#4e9e6b;--ac2:#7bc4a0;--wt:#2e6b9e;--wt2:#5a9fd4;--gd:#c9a227;--gd2:#e8c14a;--tx:#e8edf4;--tx2:#8b98b0;--tx3:#5a6a82;--rd:#e05c5c;--or:#d4844a;--pu:#7a5cb8;--r:10px;--rl:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
+header{background:linear-gradient(135deg,#0a1628,#0d2340 50%,#0a1628);border-bottom:1px solid var(--bd);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--wt),var(--ac));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.logo-text h1{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+.logo-text p{font-size:10px;color:var(--tx2);letter-spacing:1px;text-transform:uppercase}
+.hdr-r{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.vbadge{background:rgba(78,158,107,.15);border:1px solid var(--ac);color:var(--ac2);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.btn{padding:7px 13px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:all .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn-p{background:var(--ac);color:#fff}.btn-p:hover{background:var(--ac2)}
+.btn-s{background:var(--sf2);color:var(--tx);border:1px solid var(--bd)}.btn-s:hover{background:var(--bd)}
+.btn-d{background:var(--rd);color:#fff}
+.btn-g{background:var(--gd);color:#1a1000}
+.btn-pu{background:var(--pu);color:#fff}
+.btn-sm{padding:5px 9px;font-size:12px}
+.tabs{display:flex;gap:2px;padding:12px 18px 0;border-bottom:1px solid var(--bd);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:13px;font-weight:500;color:var(--tx2);border:1px solid transparent;border-bottom:none;transition:all .2s;white-space:nowrap;user-select:none}
+.tab:hover{color:var(--tx);background:var(--sf2)}
+.tab.active{color:var(--tx);background:var(--sf);border-color:var(--bd);border-bottom-color:var(--sf);margin-bottom:-1px}
+.tab-adm{color:var(--pu)!important}
+main{padding:18px;max-width:1400px;margin:0 auto}
+.vc{display:none}.vc.active{display:block}
+/* CALENDAR */
+.cal-ctrl{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.mnav{display:flex;align-items:center;gap:8px}
+.mnav button{width:28px;height:28px;border-radius:7px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mnav button:hover{background:var(--bd)}
+.mlbl{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;min-width:175px;text-align:center}
+.cal-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd)}
+.cal-grid{min-width:780px}
+.cal-hdr{display:flex;background:var(--sf2);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10}
+.cal-albl{padding:9px 11px;font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.7px;border-right:1px solid var(--bd);width:145px;min-width:145px}
+.cal-drow{display:flex;flex:1}
+.cal-dh{flex:1;min-width:28px;text-align:center;padding:4px 1px;font-size:10px;color:var(--tx2);border-right:1px solid var(--bd)}
+.cal-dh.tc{color:var(--ac2);font-weight:700}
+.cal-dh.we{color:var(--wt2)}
+.cal-row{display:flex;align-items:stretch;border-bottom:1px solid var(--bd);min-height:40px}
+.cal-row:last-child{border-bottom:none}
+.cal-an{width:145px;min-width:145px;padding:6px 9px;font-size:11px;font-weight:500;border-right:1px solid var(--bd);display:flex;align-items:center;gap:6px}
+.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cal-cells{display:flex;flex:1;position:relative}
+.cal-cell{flex:1;min-width:28px;border-right:1px solid rgba(42,52,71,.3);cursor:pointer;transition:background .1s}
+.cal-cell:last-child{border-right:none}
+.cal-cell:hover{background:rgba(78,158,107,.1)}
+.cal-cell.tc{background:rgba(78,158,107,.05)}
+.rbar{position:absolute;height:24px;top:8px;border-radius:5px;display:flex;align-items:center;padding:0 6px;font-size:10px;font-weight:600;cursor:pointer;z-index:5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 5px rgba(0,0,0,.3)}
+.rbar:hover{filter:brightness(1.15);z-index:10}
+.ghdr{padding:6px 11px;background:#191f2e;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);border-bottom:1px solid var(--bd);border-top:1px solid var(--bd)}
+/* colors */
+.dc{background:#4e9e6b}.dp{background:#2e6b9e}.ds{background:#c9622a}.dn{background:#7a5cb8}
+.rc{background:linear-gradient(90deg,#2e6647,#4e9e6b);color:#d4f5e3}
+.rp{background:linear-gradient(90deg,#1a4a72,#2e6b9e);color:#c4e0f5}
+.rs{background:linear-gradient(90deg,#8a3f14,#c9622a);color:#f5d4b0}
+.rn{background:linear-gradient(90deg,#4a3280,#7a5cb8);color:#ddd0f5}
+.rpc{background:linear-gradient(90deg,#0d3560,#1e5fa0);color:#b0d4f5}
+/* list */
+.fbr{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.fbr input,.fbr select{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:7px 10px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
+.fbr input:focus,.fbr select:focus{border-color:var(--ac)}
+.rtbl{width:100%;border-collapse:collapse;border-radius:var(--r);overflow:hidden;border:1px solid var(--bd)}
+.rtbl th{background:var(--sf2);padding:10px 11px;text-align:left;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bd)}
+.rtbl td{padding:9px 11px;border-bottom:1px solid rgba(42,52,71,.35);font-size:13px;vertical-align:middle}
+.rtbl tr:last-child td{border-bottom:none}
+.rtbl tr:hover td{background:rgba(255,255,255,.02)}
+.bdg{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+.b-ac{background:rgba(78,158,107,.2);color:var(--ac2)}
+.b-up{background:rgba(46,107,158,.2);color:var(--wt2)}
+.b-dn{background:rgba(139,152,176,.12);color:var(--tx2)}
+.b-pd{background:rgba(78,158,107,.2);color:var(--ac2)}
+.b-av{background:rgba(201,162,39,.15);color:var(--gd2)}
+.b-np{background:rgba(224,92,92,.15);color:#f08080}
+/* modal */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.mov.open{opacity:1;pointer-events:all}
+.mdl{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;transform:translateY(20px);transition:transform .2s;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.mov.open .mdl{transform:translateY(0)}
+.mhdr{padding:15px 20px 12px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sf);z-index:5}
+.mhdr h2{font-family:'Playfair Display',serif;font-size:16px}
+.mcls{width:26px;height:26px;border-radius:6px;border:none;background:var(--sf2);color:var(--tx2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.mcls:hover{background:var(--rd);color:#fff}
+.mbdy{padding:16px 20px}
+.mftr{padding:12px 20px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:7px;position:sticky;bottom:0;background:var(--sf)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg.full{grid-column:1/-1}
+label{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+input,select,textarea{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 10px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+input[readonly]{opacity:.6}
+textarea{resize:vertical;min-height:55px}
+.fc{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;cursor:pointer}
+.fc input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--ac);flex-shrink:0}
+.stl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--bd)}
+.pbox{background:linear-gradient(135deg,rgba(78,158,107,.08),rgba(46,107,158,.08));border:1px solid rgba(78,158,107,.25);border-radius:9px;padding:11px 13px;margin-bottom:10px}
+.pbox .pl{font-size:11px;color:var(--tx2);margin-bottom:2px}
+.pbox .pa{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--ac2)}
+.pbox .pb{font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.5}
+.dscbdg{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;background:rgba(212,132,74,.15);border:1px solid var(--or);color:var(--or);font-size:10px;font-weight:600;margin-top:3px}
+.psteps{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.pstep{flex:1;min-width:90px;padding:9px 7px;border-radius:7px;border:1px solid var(--bd);background:var(--sf2);text-align:center;cursor:pointer;transition:all .2s}
+.pstep:hover{border-color:var(--ac)}
+.pstep.active{border-color:var(--ac);background:rgba(78,158,107,.1)}
+.pstep .si{font-size:16px;margin-bottom:2px}
+.pstep .sl{font-size:10px;font-weight:600;color:var(--tx2)}
+.pstep.active .sl{color:var(--ac2)}
+/* stats */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.sc{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:12px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc.cg::before{background:var(--ac)}.sc.cb::before{background:var(--wt)}.sc.cy::before{background:var(--gd)}.sc.cr::before{background:var(--rd)}.sc.cp::before{background:var(--pu)}
+.sc .sl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.sc .sv{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+.sc .ss{font-size:11px;color:var(--tx2);margin-top:2px}
+/* reports */
+.rctrl{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.psel{display:flex;border:1px solid var(--bd);border-radius:7px;overflow:hidden}
+.pb{padding:6px 12px;background:var(--sf2);border:none;color:var(--tx2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;border-right:1px solid var(--bd)}
+.pb:last-child{border-right:none}
+.pb.active{background:var(--ac);color:#fff}
+.rcd{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.rch{padding:10px 14px;background:var(--sf2);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.rct{font-family:'Playfair Display',serif;font-size:14px;font-weight:600}
+.rcb{padding:12px 14px}
+.arow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(42,52,71,.3)}
+.arow:last-child{border-bottom:none}
+.bw{flex:1;height:6px;background:var(--bd);border-radius:3px;overflow:hidden}
+.bf{height:100%;border-radius:3px}
+.dt{width:100%;border-collapse:collapse}
+.dt th{padding:7px 11px;text-align:left;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)}
+.dt td{padding:8px 11px;font-size:13px;border-bottom:1px solid rgba(42,52,71,.25)}
+.dt tr:last-child td{border-bottom:none}
+.dt .tr2 td{background:var(--sf2);font-weight:700}
+/* today */
+.thdr{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;margin-bottom:14px;color:var(--ac2)}
+.tcd{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+.tch{padding:8px 12px;background:var(--sf2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bd);border-left:3px solid}
+.tit{padding:10px 12px;border-bottom:1px solid rgba(42,52,71,.3);display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.tit:last-child{border-bottom:none}
+/* admin lock */
+.lkscr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:45vh}
+.lkcd{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:30px 36px;text-align:center;max-width:340px;width:100%}
+.lkinp{background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:11px 14px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;width:100%;text-align:center;letter-spacing:3px;margin-bottom:10px}
+.lkinp:focus{border-color:var(--pu)}
+/* admin prices */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.pitm{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:11px 13px}
+.pitm .pl{font-size:11px;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.pitm .pi{display:flex;align-items:center;gap:5px}
+.pitm .pi input{font-size:14px;font-weight:600;color:var(--gd2);background:var(--sf);border:1px solid var(--bd);padding:6px 9px;border-radius:6px;width:100%}
+.pitm .pi span{font-size:11px;color:var(--tx2);white-space:nowrap}
+/* expenses */
+.exf{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;margin-bottom:13px}
+.exrow{display:flex;align-items:center;gap:7px;padding:8px 11px;border-bottom:1px solid rgba(42,52,71,.3)}
+.exrow:last-child{border-bottom:none}
+/* tooltip */
+.tt{position:fixed;background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:10px;font-size:12px;max-width:230px;z-index:300;box-shadow:0 6px 20px rgba(0,0,0,.5);pointer-events:none;opacity:0;transition:opacity .15s}
+.tt.vis{opacity:1}
+.tt p{margin-bottom:2px;color:var(--tx2)}
+.tt strong{color:var(--tx)}
+#snb{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ac),var(--wt2));z-index:998;transform:scaleX(0);transform-origin:left;transition:transform .3s}
+#snb.on{transform:scaleX(1)}
+#tst{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--sf2);border:1px solid var(--bd);border-radius:9px;padding:9px 16px;font-size:13px;z-index:997;transition:transform .3s;white-space:nowrap}
+#tst.show{transform:translateX(-50%) translateY(0)}
+#tst.ok{border-color:var(--ac);color:var(--ac2)}
+#tst.err{border-color:var(--rd);color:#f08080}
+@media print{header,.tabs,.nop{display:none!important}body{background:#fff;color:#000}.rcd{border:1px solid #ccc}.dt td,.dt th{color:#000;border-color:#ccc}}
+@media(max-width:600px){main{padding:12px}.fr{grid-template-columns:1fr}header{padding:9px 12px}.tabs{padding:9px 12px 0}.sgrid{grid-template-columns:1fr 1fr}}
+.fx{display:flex;align-items:center;gap:6px}.tr{text-align:right}.tc{text-align:center}
 
-  /* LOADER */
-  #globalLoader {
-    position: fixed; inset: 0; background: rgba(13,17,23,0.85); backdrop-filter: blur(6px);
-    z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-    transition: opacity 0.3s;
-  }
-  #globalLoader.hidden { opacity: 0; pointer-events: none; }
-  .spinner {
-    width: 40px; height: 40px; border: 3px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #loaderMsg { color: var(--text2); font-size: 14px; }
+.gov{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.gov.open{opacity:1;pointer-events:all}
+.gcd{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:30px 36px;text-align:center;max-width:340px;width:100%}
 
-  /* SYNC INDICATOR */
-  #syncBar {
-    position: fixed; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--water2));
-    z-index: 998; transform: scaleX(0); transform-origin: left;
-    transition: transform 0.3s; border-radius: 0 3px 3px 0;
-  }
-  #syncBar.active { transform: scaleX(1); }
-
-  /* TOAST */
-  #toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
-    padding: 12px 20px; font-size: 13px; z-index: 997;
-    transition: transform 0.3s; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    white-space: nowrap;
-  }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  #toast.success { border-color: var(--accent); color: var(--accent2); }
-  #toast.error { border-color: var(--red); color: #f08080; }
-
-  header {
-    background: linear-gradient(135deg, #0a1628 0%, #0d2340 50%, #0a1628 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 24px;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  }
-  .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--water), var(--accent));
-    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
-  }
-  .logo-text h1 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; }
-  .logo-text p { font-size: 11px; color: var(--text2); letter-spacing: 1px; text-transform: uppercase; }
-  .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  #syncStatus { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 6px; }
-  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .btn {
-    padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
-    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
-  }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .btn-secondary:hover { background: var(--border); }
-  .btn-danger { background: var(--red); color: white; }
-  .btn-danger:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .tabs {
-    display: flex; gap: 2px; padding: 16px 24px 0;
-    border-bottom: 1px solid var(--border); overflow-x: auto;
-  }
-  .tab {
-    padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer;
-    font-size: 13px; font-weight: 500; color: var(--text2);
-    border: 1px solid transparent; border-bottom: none; transition: all 0.2s; white-space: nowrap;
-  }
-  .tab:hover { color: var(--text); background: var(--surface2); }
-  .tab.active { color: var(--text); background: var(--surface); border-color: var(--border); border-bottom-color: var(--surface); margin-bottom: -1px; }
-
-  main { padding: 24px; max-width: 1400px; margin: 0 auto; }
-  .view-content { display: none; }
-  .view-content.active { display: block; }
-
-  /* CALENDAR */
-  .calendar-controls { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .month-nav { display: flex; align-items: center; gap: 12px; }
-  .month-nav button {
-    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface2); color: var(--text); cursor: pointer; font-size: 16px;
-    display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-  }
-  .month-nav button:hover { background: var(--border); }
-  .month-label { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; min-width: 200px; text-align: center; }
-  .calendar-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
-  .calendar-grid { min-width: 900px; }
-  .cal-header-row { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
-  .cal-asset-label { padding: 10px 12px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; border-right: 1px solid var(--border); width: 160px; min-width: 160px; }
-  .cal-days-row { display: flex; flex: 1; }
-  .cal-day-header { flex: 1; min-width: 32px; text-align: center; padding: 6px 2px; font-size: 11px; color: var(--text2); border-right: 1px solid var(--border); }
-  .cal-day-header.today-col { color: var(--accent2); font-weight: 700; }
-  .cal-day-header.weekend { color: var(--water2); }
-  .cal-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); min-height: 44px; }
-  .cal-row:last-child { border-bottom: none; }
-  .cal-asset-name { width: 160px; min-width: 160px; padding: 8px 12px; font-size: 13px; font-weight: 500; border-right: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
-  .asset-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .cal-cells { display: flex; flex: 1; position: relative; }
-  .cal-cell { flex: 1; min-width: 32px; border-right: 1px solid rgba(42,52,71,0.5); cursor: pointer; transition: background 0.15s; }
-  .cal-cell:last-child { border-right: none; }
-  .cal-cell:hover { background: rgba(78,158,107,0.1); }
-  .cal-cell.today-col { background: rgba(78,158,107,0.05); }
-  .res-bar {
-    position: absolute; height: 28px; top: 8px; border-radius: 6px;
-    display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 600;
-    cursor: pointer; z-index: 5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: filter 0.15s, transform 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  .res-bar:hover { filter: brightness(1.15); transform: scaleY(1.05); z-index: 10; }
-  .group-header { padding: 8px 14px; background: #1c2230; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #8b98b0; border-bottom: 1px solid #2a3447; }
-
-  /* LIST */
-  .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
-  .filter-bar input, .filter-bar select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s; }
-  .filter-bar input:focus, .filter-bar select:focus { border-color: var(--accent); }
-  .res-table { width: 100%; border-collapse: collapse; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
-  .res-table th { background: var(--surface2); padding: 12px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid var(--border); }
-  .res-table td { padding: 12px 14px; border-bottom: 1px solid rgba(42,52,71,0.5); font-size: 13px; vertical-align: middle; }
-  .res-table tr:last-child td { border-bottom: none; }
-  .res-table tr:hover td { background: rgba(255,255,255,0.02); }
-  .badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
-  .badge-active { background: rgba(78,158,107,0.2); color: var(--accent2); }
-  .badge-upcoming { background: rgba(46,107,158,0.2); color: var(--water2); }
-  .badge-done { background: rgba(139,152,176,0.15); color: var(--text2); }
-  .badge-avans-ok { background: rgba(201,162,39,0.15); color: var(--gold); }
-  .badge-avans-no { background: rgba(224,92,92,0.15); color: var(--red); }
-
-  /* MODAL */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: transform 0.25s; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .modal-header h2 { font-family: 'Playfair Display', serif; font-size: 18px; }
-  .modal-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: var(--surface2); color: var(--text2); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-  .modal-close:hover { background: var(--red); color: white; }
-  .modal-body { padding: 20px 24px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group.full { grid-column: 1 / -1; }
-  label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.6px; }
-  input, select, textarea { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 70px; }
-  .form-check { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
-  .form-check input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent); }
-  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
-
-  /* STATS */
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-  .stat-card .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-  .stat-card .value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--accent2); }
-  .stat-card .sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
-  .asset-group { margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-  .asset-group-header { padding: 10px 14px; background: var(--surface2); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); border-bottom: 1px solid var(--border); }
-
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
-
-  .info-tooltip { position: fixed; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 12px; max-width: 260px; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.5); pointer-events: none; opacity: 0; transition: opacity 0.2s; }
-  .info-tooltip.visible { opacity: 1; }
-  .info-tooltip p { margin-bottom: 4px; color: var(--text2); }
-  .info-tooltip strong { color: var(--text); }
-
-  .flex { display: flex; align-items: center; gap: 8px; }
-  .text-right { text-align: right; }
-  .text-center { text-align: center; }
-
-  .dot-cabana { background: #4e9e6b; }
-  .dot-ponton { background: #2e6b9e; }
-  .dot-sauna  { background: #c9622a; }
-  .dot-pensiune { background: #7a5cb8; }
-  .res-cabana { background: linear-gradient(90deg, #2e6647, #4e9e6b); color: #d4f5e3; }
-  .res-ponton { background: linear-gradient(90deg, #1a4a72, #2e6b9e); color: #c4e0f5; }
-  .res-sauna  { background: linear-gradient(90deg, #8a3f14, #c9622a); color: #f5d4b0; }
-  .res-pensiune { background: linear-gradient(90deg, #4a3280, #7a5cb8); color: #ddd0f5; }
-
-  @media (max-width: 640px) {
-    main { padding: 16px; }
-    .form-row { grid-template-columns: 1fr; }
-    header { padding: 12px 16px; }
-    .tabs { padding: 12px 16px 0; }
-  }
 </style>
 </head>
 <body>
-
-<!-- GLOBAL LOADER -->
-<div id="globalLoader">
-  <div class="spinner"></div>
-  <div id="loaderMsg">Se încarcă rezervările...</div>
-</div>
-
-<!-- SYNC BAR -->
-<div id="syncBar"></div>
-
-<!-- TOAST -->
-<div id="toast"></div>
-
+<div id="snb"></div><div id="tst"></div>
 <header>
   <div class="logo">
     <div class="logo-icon">🎣</div>
-    <div class="logo-text">
-      <h1>Lacul Micești</h1>
-      <p>Sistem Rezervări Live</p>
-    </div>
+    <div class="logo-text"><h1>Lacul Micești</h1><p>Sistem Rezervări</p></div>
   </div>
-  <div class="header-right">
-    <div id="syncStatus"><span class="sync-dot"></span> <span id="syncText">Sincronizat</span></div>
-    <button class="btn btn-secondary" onclick="loadReservations()">🔄 Refresh</button>
-    <button class="btn btn-secondary" onclick="exportCSV()">📥 CSV</button>
-    <button class="btn btn-primary" onclick="openModal()">＋ Rezervare nouă</button>
+  <div class="hdr-r">
+    <span class="vbadge">v0.2</span>
+    <button class="btn btn-s btn-sm nop" onclick="exportCSV()">📥 CSV</button>
+    <button class="btn btn-p nop" onclick="openModal()">＋ Rezervare</button>
   </div>
 </header>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('calendar')">📅 Calendar</div>
-  <div class="tab" onclick="switchTab('list')">📋 Listă</div>
-  <div class="tab" onclick="switchTab('today')">🌅 Azi</div>
-  <div class="tab" onclick="switchTab('stats')">📊 Statistici</div>
+<div class="tabs nop">
+  <div class="tab active" onclick="sw('calendar')">📅 Calendar</div>
+  <div class="tab tab-adm" onclick="swP('admin')">🔐 Admin</div>
 </div>
-
 <main>
-  <div id="view-calendar" class="view-content active">
-    <div class="calendar-controls">
-      <div class="month-nav">
-        <button onclick="prevMonth()">‹</button>
-        <span class="month-label" id="monthLabel"></span>
-        <button onclick="nextMonth()">›</button>
+  <div id="vc-calendar" class="vc active">
+    <div class="cal-ctrl">
+      <div class="mnav">
+        <button onclick="pM()">&#8249;</button>
+        <span class="mlbl" id="mlbl"></span>
+        <button onclick="nM()">&#8250;</button>
       </div>
-      <button class="btn btn-secondary" onclick="goToday()">Azi</button>
+      <button class="btn btn-s btn-sm" onclick="gT()">Azi</button>
     </div>
-    <div class="calendar-wrap">
-      <div class="calendar-grid" id="calendarGrid"></div>
-    </div>
+    <div class="cal-wrap"><div class="cal-grid" id="calGrid"></div></div>
   </div>
-
-  <div id="view-list" class="view-content">
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="🔍 Caută nume, asset..." oninput="renderList()">
-      <select id="filterAsset" onchange="renderList()">
-        <option value="">Toate asseturile</option>
-      </select>
-      <select id="filterStatus" onchange="renderList()">
+  <div id="vc-list" class="vc">
+    <div class="fbr">
+      <input type="text" id="srch" placeholder="🔍 Caută..." oninput="rL()" style="width:160px">
+      <select id="fA" onchange="rL()"><option value="">Toate</option></select>
+      <select id="fS" onchange="rL()">
         <option value="">Toate statusurile</option>
-        <option value="active">Activ</option>
-        <option value="upcoming">Viitor</option>
-        <option value="done">Finalizat</option>
+        <option value="active">Activ</option><option value="upcoming">Viitor</option><option value="done">Finalizat</option>
       </select>
-      <select id="filterAvans" onchange="renderList()">
-        <option value="">Avans: toate</option>
-        <option value="yes">Avans plătit</option>
-        <option value="no">Fără avans</option>
+      <select id="fP" onchange="rL()">
+        <option value="">Toate plățile</option>
+        <option value="paid">Achitat</option><option value="avans">Avans</option><option value="none">Neachitat</option>
       </select>
     </div>
-    <div id="listContainer"></div>
+    <div id="lCnt"></div>
   </div>
-
-  <div id="view-today" class="view-content">
-    <div id="todayContainer"></div>
-  </div>
-
-  <div id="view-stats" class="view-content">
-    <div id="statsContainer"></div>
-  </div>
-</main>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="modalTitle">Rezervare nouă</h2>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+  <div id="vc-today" class="vc"><div id="tdCnt"></div></div>
+  <div id="vc-reports" class="vc">
+    <div class="rctrl nop">
+      <div class="psel">
+        <button class="pb active" onclick="sP('week',this)">Săpt. aceasta</button>
+        <button class="pb" onclick="sP('lastweek',this)">Săpt. trecută</button>
+        <button class="pb" onclick="sP('month',this)">Luna aceasta</button>
+        <button class="pb" onclick="sP('lastmonth',this)">Luna trecută</button>
+      </div>
+      <button class="btn btn-g btn-sm" onclick="window.print()">🖨️ Print decont</button>
     </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group full">
-          <label>Asset *</label>
-          <select id="fAsset">
-            <optgroup label="🏠 Cabănuțe">
-              <option>Cabănuța 1</option><option>Cabănuța 2</option><option>Cabănuța 3</option>
-              <option>Cabănuța 4</option><option>Cabănuța 5</option><option>Cabănuța 6</option>
-              <option>Cabănuța 7</option><option>Cabănuța 8</option>
-            </optgroup>
-            <optgroup label="⛵ Pontoane">
-              <option>Ponton 1</option><option>Ponton 2</option><option>Ponton 3</option>
-            </optgroup>
-            <optgroup label="🔥 Wellness">
-              <option>Saună &amp; Ciubăr</option>
-            </optgroup>
-            <optgroup label="🛏 Pensiune">
-              <option>Camera 1</option><option>Camera 2</option><option>Camera 3</option>
-              <option>Camera 4</option><option>Camera 5</option><option>Camera 6</option>
-            </optgroup>
+    <div id="rpCnt"></div>
+  </div>
+  <div id="vc-stats" class="vc"><div id="stCnt"></div></div>
+  <div id="vc-admin" class="vc">
+    <div id="admLck" class="lkscr">
+      <div class="lkcd">
+        <div style="font-size:40px;margin-bottom:10px">🔐</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:5px">Panou Administrator</h2>
+        <p style="font-size:12px;color:var(--tx2);margin-bottom:14px">Prețuri, cheltuieli și decont 60/40</p>
+        <input type="password" class="lkinp" id="lkInp" placeholder="••••••••" onkeydown="if(event.key==='Enter')chkP()">
+        <div id="lkErr" style="color:var(--rd);font-size:12px;min-height:16px;margin-bottom:8px"></div>
+        <button class="btn btn-pu" style="width:100%" onclick="chkP()">🔓 Deblochează</button>
+      </div>
+    </div>
+    <div id="admCnt" style="display:none">
+      <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--bd);padding-bottom:0;flex-wrap:wrap;align-items:flex-end">
+        <button onclick="aTab('list')" id="at-list" class="tab active" style="border-radius:7px 7px 0 0;font-size:12px">📋 Listă</button>
+        <button onclick="aTab('today')" id="at-today" class="tab" style="border-radius:7px 7px 0 0;font-size:12px">🌅 Azi</button>
+        <button onclick="aTab('reports')" id="at-reports" class="tab" style="border-radius:7px 7px 0 0;font-size:12px">📊 Rapoarte & Decont</button>
+        <button onclick="aTab('stats')" id="at-stats" class="tab" style="border-radius:7px 7px 0 0;font-size:12px">📈 Statistici</button>
+        <button onclick="aTab('prices')" id="at-prices" class="tab" style="border-radius:7px 7px 0 0;font-size:12px">💲 Prețuri</button>
+        <button class="btn btn-s btn-sm" style="margin-left:auto;margin-bottom:1px" onclick="lkAdm()">🔒 Blochează</button>
+      </div>
+      <div id="at-c-list">
+        <div class="fbr">
+          <input type="text" id="srch2" placeholder="🔍 Caută..." oninput="rL2()" style="width:160px">
+          <select id="fA2" onchange="rL2()"><option value="">Toate</option></select>
+          <select id="fS2" onchange="rL2()">
+            <option value="">Toate statusurile</option>
+            <option value="active">Activ</option><option value="upcoming">Viitor</option><option value="done">Finalizat</option>
+          </select>
+          <select id="fP2" onchange="rL2()">
+            <option value="">Toate plățile</option>
+            <option value="paid">Achitat</option><option value="avans">Avans</option><option value="none">Neachitat</option>
+          </select>
+          <button class="btn btn-s btn-sm" onclick="exportCSV()">📥 CSV</button>
+        </div>
+        <div id="lCnt2"></div>
+      </div>
+      <div id="at-c-today" style="display:none"><div id="tdCnt2"></div></div>
+      <div id="at-c-reports" style="display:none">
+        <div class="rctrl" style="margin-bottom:14px">
+          <div class="psel">
+            <button class="pb active" onclick="sP2('week',this)">Săpt. aceasta</button>
+            <button class="pb" onclick="sP2('lastweek',this)">Săpt. trecută</button>
+            <button class="pb" onclick="sP2('month',this)">Luna aceasta</button>
+            <button class="pb" onclick="sP2('lastmonth',this)">Luna trecută</button>
+          </div>
+          <button class="btn btn-g btn-sm" onclick="window.print()">🖨️ Print</button>
+        </div>
+        <div id="rpCnt2"></div>
+      </div>
+      <div id="at-c-stats" style="display:none"><div id="stCnt2"></div></div>
+      <div id="at-c-prices">
+        <div class="stl">🏠 Cabănuțe (ponton inclus în preț)</div>
+        <div class="pgrid" style="margin-bottom:12px">
+          <div class="pitm"><div class="pl">1 noapte</div><div class="pi"><input type="number" id="pc1" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">2 nopți</div><div class="pi"><input type="number" id="pc2" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">3+ nopți</div><div class="pi"><input type="number" id="pc3" min="0"><span>RON/noapte</span></div></div>
+        </div>
+        <div class="stl">⛵ Pontoane &amp; 🔥 Saună</div>
+        <div class="pgrid" style="margin-bottom:12px">
+          <div class="pitm"><div class="pl">Ponton / pescar / zi</div><div class="pi"><input type="number" id="pp" min="0"><span>RON</span></div></div>
+          <div class="pitm"><div class="pl">Saună &amp; Ciubăr / sesiune</div><div class="pi"><input type="number" id="psa" min="0"><span>RON</span></div></div>
+        </div>
+        <div class="stl">🛏 Pensiune</div>
+        <div class="pgrid" style="margin-bottom:14px">
+          <div class="pitm"><div class="pl">Camera 1</div><div class="pi"><input type="number" id="pn1" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">Camera 2</div><div class="pi"><input type="number" id="pn2" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">Camera 3</div><div class="pi"><input type="number" id="pn3" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">Camera 4</div><div class="pi"><input type="number" id="pn4" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">Camera 5</div><div class="pi"><input type="number" id="pn5" min="0"><span>RON/noapte</span></div></div>
+          <div class="pitm"><div class="pl">Camera 6</div><div class="pi"><input type="number" id="pn6" min="0"><span>RON/noapte</span></div></div>
+        </div>
+        <button class="btn btn-p" onclick="svPr()">💾 Salvează prețurile</button>
+      </div>
+      <div id="at-c-expenses" style="display:none">
+        <div class="exf">
+          <div class="stl">Adaugă cheltuială nouă</div>
+          <div class="fr">
+            <div class="fg"><label>Data</label><input type="date" id="ed"></div>
+            <div class="fg"><label>Categorie</label>
+              <select id="ec">
+                <option value="detergenti">🧴 Detergenți / Curățenie</option>
+                <option value="lenjerii">🛏 Spălat lenjerii</option>
+                <option value="achizitii">🛒 Achiziții diverse</option>
+                <option value="altele">📌 Altele</option>
+              </select>
+            </div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label>Sumă (RON)</label><input type="number" id="es" min="0" placeholder="0"></div>
+            <div class="fg"><label>Nr. bon / factură</label><input type="text" id="eb" placeholder="BON-001"></div>
+          </div>
+          <div class="fr"><div class="fg full"><label>Descriere</label><input type="text" id="edesc" placeholder="Detergenți Lidl, lenjerii Hotel Fabric..."></div></div>
+          <button class="btn btn-p btn-sm" onclick="addEx()">＋ Adaugă</button>
+        </div>
+        <div class="rcd"><div class="rch"><div class="rct">📋 Cheltuieli înregistrate</div>
+          <select id="exf" onchange="rEx()" style="background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:4px 8px;border-radius:6px;font-size:12px;outline:none">
+            <option value="all">Toate</option><option value="week">Săpt. aceasta</option>
+            <option value="lastweek">Săpt. trecută</option><option value="month">Luna aceasta</option>
+            <option value="lastmonth">Luna trecută</option>
           </select>
         </div>
+        <div id="exLst"></div></div>
       </div>
-      <div class="form-row">
-        <div class="form-group full">
-          <label>Nume client *</label>
-          <input type="text" id="fNume" placeholder="Ex: Ion Popescu">
+      <div id="at-c-decont" style="display:none">
+        <div class="rctrl nop">
+          <div class="psel">
+            <button class="pb active" onclick="sDp('week',this)">Săpt. aceasta</button>
+            <button class="pb" onclick="sDp('lastweek',this)">Săpt. trecută</button>
+            <button class="pb" onclick="sDp('month',this)">Luna aceasta</button>
+            <button class="pb" onclick="sDp('lastmonth',this)">Luna trecută</button>
+          </div>
+          <button class="btn btn-g btn-sm" onclick="window.print()">🖨️ Print decont</button>
         </div>
+        <div id="dcCnt"></div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Telefon</label>
-          <input type="tel" id="fTel" placeholder="+40...">
-        </div>
-        <div class="form-group">
-          <label>Nr. persoane</label>
-          <input type="number" id="fPersoane" min="1" value="2">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Check-in *</label>
-          <input type="datetime-local" id="fCheckin">
-        </div>
-        <div class="form-group">
-          <label>Check-out *</label>
-          <input type="datetime-local" id="fCheckout">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Preț total (RON)</label>
-          <input type="number" id="fPret" min="0" placeholder="0" oninput="calcRest()">
-        </div>
-        <div class="form-group">
-          <label>Avans încasat (RON)</label>
-          <input type="number" id="fAvans" min="0" placeholder="0" oninput="calcRest()">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Rest de plată (auto)</label>
-          <input type="number" id="fRest" readonly placeholder="0" style="opacity:0.7">
-        </div>
-        <div class="form-group">
-          <label>Avans primit?</label>
-          <label class="form-check">
-            <input type="checkbox" id="fAvansOk">
-            <span>Da, avansul a fost primit</span>
-          </label>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full">
-          <label>Observații</label>
-          <textarea id="fNote" placeholder="Cerințe speciale, meniu, aranjamente..."></textarea>
-        </div>
-      </div>
-      <div id="fDays" style="font-size:13px;color:var(--accent2);font-weight:600;margin-top:4px"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" id="btnDelete" onclick="deleteReservation()" style="display:none;margin-right:auto">🗑 Șterge</button>
-      <button class="btn btn-secondary" onclick="closeModal()">Anulează</button>
-      <button class="btn btn-primary" id="btnSave" onclick="saveReservation()">💾 Salvează</button>
+  </div>
+</main>
+<!-- MODAL -->
+<div class="mov" id="mOv">
+  <div class="mdl">
+    <div class="mhdr"><h2 id="mTtl">Rezervare nouă</h2><button class="mcls" onclick="clsM()">✕</button></div>
+    <div class="mbdy">
+      <div class="stl">Asset &amp; Client</div>
+      <div class="fr"><div class="fg full">
+        <label>Asset(uri) * <span style="color:var(--tx3);font-size:10px">— poți selecta mai multe pentru același client</span></label>
+        <div id="assetsList" style="display:flex;flex-direction:column;gap:6px"></div>
+        <button type="button" onclick="addAssetRow()" style="margin-top:6px;background:var(--sf2);border:1px dashed var(--bd);color:var(--tx2);padding:7px 12px;border-radius:7px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;width:100%;transition:all .2s" onmouseover="this.style.borderColor='var(--ac)';this.style.color='var(--ac2)'" onmouseout="this.style.borderColor='var(--bd)';this.style.color='var(--tx2)'">＋ Adaugă alt asset (același client)</button>
+      </div></div>
+      <div id="pescSec" style="display:none;margin-bottom:10px">
+        <div class="fr">
+          <div class="fg"><label id="pescLbl">Nr. pescari *</label><input type="number" id="fPesc" min="1" max="8" value="1" oninput="cP()"></div>
+          <div class="fg"><label>Însoțitori (fără taxă)</label><input type="number" id="fIns" min="0" max="6" value="0"></div>
+        </div>
+        <div id="pescNote" style="font-size:11px;color:var(--tx2);margin-top:-5px;margin-bottom:7px"></div>
+      </div>
+      <div class="fr"><div class="fg full"><label>Nume client *</label><input type="text" id="fNm" placeholder="Ion Popescu"></div></div>
+      <div class="fr">
+        <div class="fg"><label>Telefon</label><input type="text" id="fTl" placeholder="+40..."></div>
+        <div class="fg"><label>Nr. persoane</label><input type="number" id="fPs" min="1" value="2"></div>
+      </div>
+      <div class="stl" style="margin-top:12px">Date identitate</div>
+      <div class="fr">
+        <div class="fg"><label>CNP</label><input type="text" id="fCNP" placeholder="1234567890123" maxlength="13"></div>
+        <div class="fg"><label>Serie &amp; Nr. act</label><input type="text" id="fAct" placeholder="AB 123456"></div>
+      </div>
+      <div class="fr"><div class="fg full"><label>Autoritate emitentă</label><input type="text" id="fAut" placeholder="SPCLEP Cluj-Napoca"></div></div>
+      <div class="stl" style="margin-top:12px">Perioada</div>
+      <div id="nDR">
+        <div class="fr">
+          <div class="fg"><label>Check-in <span style="color:var(--tx3);font-size:10px">(14:00)</span></label><input type="date" id="fCI" onchange="cP()"></div>
+          <div class="fg"><label>Check-out <span style="color:var(--tx3);font-size:10px">(11:00)</span></label><input type="date" id="fCO" onchange="cP()"></div>
+        </div>
+      </div>
+      <div id="sDR" style="display:none">
+        <div class="fr">
+          <div class="fg"><label>Data sesiunii</label><input type="date" id="fSD" onchange="cP()"></div>
+          <div class="fg"><label>Ora</label><input type="time" id="fSO" value="14:00"></div>
+        </div>
+      </div>
+      <div id="dInfo" style="font-size:12px;color:var(--ac2);font-weight:600;margin-top:-3px;margin-bottom:8px"></div>
+      <div class="pbox" id="pPrev" style="display:none">
+        <div class="pl">Preț calculat automat</div>
+        <div class="pa" id="pAmt">0 RON</div>
+        <div class="pb" id="pBrk"></div>
+        <div id="dscBdg" class="dscbdg" style="display:none">⚡ Preț modificat manual</div>
+      </div>
+      <div class="stl" style="margin-top:12px">Plată</div>
+      <div class="psteps">
+        <div class="pstep" id="ps-none" onclick="sPay('none')"><div class="si">🔴</div><div class="sl">Neachitat</div></div>
+        <div class="pstep" id="ps-avans" onclick="sPay('avans')"><div class="si">🟡</div><div class="sl">Avans plătit</div></div>
+        <div class="pstep" id="ps-paid" onclick="sPay('paid')"><div class="si">🟢</div><div class="sl">Achitat integral</div></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Preț total (RON) <span style="color:var(--or);font-size:9px">editabil</span></label><input type="number" id="fPr" min="0" placeholder="auto" oninput="onPrEdit()"></div>
+        <div class="fg"><label>Avans încasat (RON)</label><input type="number" id="fAv" min="0" placeholder="0" oninput="cR()"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>Rest de plată</label><input type="number" id="fRst" readonly placeholder="0"></div>
+        <div class="fg"><label>Data încasare integrală</label><input type="date" id="fDP"></div>
+      </div>
+      <div id="pStdInfo" style="font-size:11px;color:var(--tx2);margin-top:-5px;margin-bottom:9px"></div>
+      <div class="stl" style="margin-top:12px">Observații</div>
+      <div class="fr"><div class="fg full"><textarea id="fNt" placeholder="Cerințe speciale, discount aplicat..."></textarea></div></div>
+    </div>
+    <div class="mftr">
+      <button class="btn btn-d btn-sm" id="bDel" onclick="delR()" style="display:none;margin-right:auto">🗑 Șterge</button>
+      <button class="btn btn-s" onclick="clsM()">Anulează</button>
+      <button class="btn btn-p" onclick="svR()">💾 Salvează</button>
     </div>
   </div>
 </div>
+<!-- GATE MODAL -->
+<div class="gov" id="gateOv">
+  <div class="gcd">
+    <div style="font-size:38px;margin-bottom:10px">🔐</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:17px;margin-bottom:5px">Secțiune protejată</h2>
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:14px">Introdu parola pentru a continua</p>
+    <input type="password" id="gateInp" placeholder="••••••••" class="lkinp" onkeydown="if(event.key==='Enter')gateLogin()" style="margin-bottom:9px">
+    <div id="gateErr" style="color:var(--rd);font-size:12px;min-height:16px;margin-bottom:8px"></div>
+    <button class="btn btn-pu" style="width:100%" onclick="gateLogin()">🔓 Intră</button>
+    <button class="btn btn-s" style="width:100%;margin-top:7px" onclick="document.getElementById('gateOv').classList.remove('open');document.getElementById('gateInp').value='';document.getElementById('gateErr').textContent=''">Anulează</button>
+  </div>
+</div>
 
-<div class="info-tooltip" id="tooltip"></div>
-
+<div class="tt" id="tt"></div>
 <script>
-// ═══════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbwEMP72IyDQQYzoiVTlCpB7txuFaGJEk0L_uGxbVEC3Z7txOfV-e_dnd-VkaNAq3osi/exec';
-const AUTO_REFRESH_MS = 30000; // refresh automat la 30 secunde
-
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
-let reservations = [];
-let editingId = null;
-let calYear, calMonth;
-let refreshTimer = null;
-
-const MONTHS_RO = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
-const DAYS_SHORT = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'];
-
-const ASSET_COLORS = {
-  cabana:   { dotClass: 'dot-cabana',   barClass: 'res-cabana' },
-  ponton:   { dotClass: 'dot-ponton',   barClass: 'res-ponton' },
-  sauna:    { dotClass: 'dot-sauna',    barClass: 'res-sauna'  },
-  pensiune: { dotClass: 'dot-pensiune', barClass: 'res-pensiune' },
-};
-
-const ALL_ASSETS = [
+const SK='lm_v02f',EK='lm_ex_v02',PK='lm_pr_v02',PASS='Abundenta';
+const API='https://script.google.com/macros/s/AKfycbwrA-mgAFu1qVxzVPPjtGHbt-vMs-WiMwgzvJxfXhfgt8LY9DdNf1aA0NsjFOnll7qr/exec';
+const SPLIT={o:.6,a:.4};
+const MONTHS=['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+const DAYS=['Lu','Ma','Mi','Jo','Vi','Sa','Du'];
+const ECATS={detergenti:'🧴 Detergenți',lenjerii:'🛏 Lenjerii',achizitii:'🛒 Achiziții',altele:'📌 Altele'};
+const BHEX={cabana:'#4e9e6b',ponton:'#2e6b9e','ponton-cabana':'#1e5fa0',sauna:'#c9622a',pensiune:'#7a5cb8'};
+const COLS={cabana:{d:'dc',b:'rc'},ponton:{d:'dp',b:'rp'},'ponton-cabana':{d:'dp',b:'rpc'},sauna:{d:'ds',b:'rs'},pensiune:{d:'dn',b:'rn'}};
+let RS=[],EX=[],PR={c:{1:700,2:600,3:500},p:80,s:150,n:{'Camera 1':300,'Camera 2':250,'Camera 3':250,'Camera 4':250,'Camera 5':250,'Camera 6':300}};
+let eId=null,cY,cM,cTab='calendar',rPer='week',rPer2='week',dPer='week',pSt='none',aP=0,adm=false,pendingTab=null;
+const ALL=[
   'Cabănuța 1','Cabănuța 2','Cabănuța 3','Cabănuța 4','Cabănuța 5','Cabănuța 6','Cabănuța 7','Cabănuța 8',
   'Ponton 1','Ponton 2','Ponton 3',
-  'Saună & Ciubăr',
-  'Camera 1','Camera 2','Camera 3','Camera 4','Camera 5','Camera 6',
+  'Ponton Cabănuța 1','Ponton Cabănuța 2','Ponton Cabănuța 3','Ponton Cabănuța 4',
+  'Ponton Cabănuța 5','Ponton Cabănuța 6','Ponton Cabănuța 7','Ponton Cabănuța 8',
+  'Saună & Ciubăr','Camera 1','Camera 2','Camera 3','Camera 4','Camera 5','Camera 6'
 ];
+function gT2(a){if(a.startsWith('Cabănuța'))return'cabana';if(a.startsWith('Ponton Cabănuța'))return'ponton-cabana';if(a.startsWith('Ponton'))return'ponton';if(a.startsWith('Saună'))return'sauna';return'pensiune';}
+// ── SYNC BAR ──
+function setSyncing(on){document.getElementById('snb').classList.toggle('on',on);}
 
-function getType(asset) {
-  if (asset.startsWith('Cabănuța')) return 'cabana';
-  if (asset.startsWith('Ponton'))   return 'ponton';
-  if (asset.startsWith('Saună'))    return 'sauna';
-  return 'pensiune';
+// ── API ──
+async function apiGet(){
+  const r=await fetch(API+'?action=list&t='+Date.now());
+  return await r.json();
+}
+async function apiPost(body){
+  const r=await fetch(API,{method:'POST',body:JSON.stringify(body)});
+  return await r.json();
 }
 
-// ═══════════════════════════════════════
-// API
-// ═══════════════════════════════════════
-function setSyncing(on) {
-  document.getElementById('syncBar').classList.toggle('active', on);
-  document.getElementById('syncText').textContent = on ? 'Sincronizare...' : 'Sincronizat';
-}
+// ── PRICES: still localStorage (admin preference) ──
+function svPRD(){localStorage.setItem(PK,JSON.stringify(PR));}
 
-async function apiGet() {
-  const resp = await fetch(API_URL + '?action=list&t=' + Date.now());
-  const json = await resp.json();
-  if (!json.ok) throw new Error(json.error || 'Eroare server');
-  return json.data;
-}
-
-async function apiPost(body) {
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-  const json = await resp.json();
-  if (!json.ok) throw new Error(json.error || 'Eroare server');
-  return json;
-}
-
-async function loadReservations(silent = false) {
-  if (!silent) setSyncing(true);
-  try {
-    const data = await apiGet();
-    reservations = data.map(r => ({
-      ...r,
-      avansOk: r.avansOk === 'TRUE' || r.avansOk === true,
-      pret: parseFloat(r.pret) || 0,
-      avans: parseFloat(r.avans) || 0,
-      rest: parseFloat(r.rest) || 0,
-      persoane: parseInt(r.persoane) || 1,
-    })).filter(r => r.id);
-    refreshAll();
-    if (!silent) toast('✓ Date actualizate', 'success');
-  } catch(e) {
-    toast('⚠ Eroare la încărcare: ' + e.message, 'error');
-  } finally {
-    setSyncing(false);
-    hideLoader();
-  }
-}
-
-function hideLoader() {
-  document.getElementById('globalLoader').classList.add('hidden');
-}
-
-// ═══════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════
-let toastTimer;
-function toast(msg, type = 'success') {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'show ' + type;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.className = '', 3000);
-}
-
-// ═══════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════
-let currentTab = 'calendar';
-
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['calendar','list','today','stats'][i] === tab);
-  });
-  document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + tab).classList.add('active');
-  refreshCurrent();
-}
-
-function refreshAll() {
-  refreshCurrent();
-}
-
-function refreshCurrent() {
-  if (currentTab === 'calendar') renderCalendar();
-  if (currentTab === 'list')     renderList();
-  if (currentTab === 'today')    renderToday();
-  if (currentTab === 'stats')    renderStats();
-}
-
-// ═══════════════════════════════════════
-// MODAL
-// ═══════════════════════════════════════
-function openModal(id = null, preAsset = null, preDate = null) {
-  editingId = id;
-  document.getElementById('modalTitle').textContent = id ? 'Editează rezervarea' : 'Rezervare nouă';
-  document.getElementById('btnDelete').style.display = id ? 'flex' : 'none';
-
-  if (id) {
-    const r = reservations.find(x => x.id === id);
-    if (r) {
-      document.getElementById('fAsset').value = r.asset;
-      document.getElementById('fNume').value = r.nume;
-      document.getElementById('fTel').value = r.tel || '';
-      document.getElementById('fPersoane').value = r.persoane || 2;
-      document.getElementById('fCheckin').value = r.checkin;
-      document.getElementById('fCheckout').value = r.checkout;
-      document.getElementById('fPret').value = r.pret || '';
-      document.getElementById('fAvans').value = r.avans || '';
-      document.getElementById('fAvansOk').checked = r.avansOk || false;
-      document.getElementById('fNote').value = r.note || '';
-      calcRest();
-    }
-  } else {
-    document.getElementById('fAsset').value = preAsset || 'Cabănuța 1';
-    document.getElementById('fNume').value = '';
-    document.getElementById('fTel').value = '';
-    document.getElementById('fPersoane').value = 2;
-    const base = preDate ? new Date(preDate) : new Date();
-    base.setHours(14, 0, 0, 0);
-    document.getElementById('fCheckin').value = toLocalISO(base);
-    const out = new Date(base);
-    out.setDate(out.getDate() + 1); out.setHours(12, 0, 0, 0);
-    document.getElementById('fCheckout').value = toLocalISO(out);
-    document.getElementById('fPret').value = '';
-    document.getElementById('fAvans').value = '';
-    document.getElementById('fRest').value = '';
-    document.getElementById('fAvansOk').checked = false;
-    document.getElementById('fNote').value = '';
-    document.getElementById('fDays').textContent = '';
-  }
-
-  document.getElementById('modalOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('fNume').focus(), 100);
-}
-
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  editingId = null;
-}
-
-document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-
-function calcRest() {
-  const pret = parseFloat(document.getElementById('fPret').value) || 0;
-  const avans = parseFloat(document.getElementById('fAvans').value) || 0;
-  document.getElementById('fRest').value = Math.max(0, pret - avans) || '';
-  const ci = document.getElementById('fCheckin').value;
-  const co = document.getElementById('fCheckout').value;
-  if (ci && co) {
-    const diff = (new Date(co) - new Date(ci)) / 86400000;
-    document.getElementById('fDays').textContent = diff > 0 ? `📅 Durată: ${diff.toFixed(1)} zile` : '';
-  }
-}
-
-document.getElementById('fCheckin').addEventListener('change', calcRest);
-document.getElementById('fCheckout').addEventListener('change', calcRest);
-
-async function saveReservation() {
-  const asset   = document.getElementById('fAsset').value;
-  const nume    = document.getElementById('fNume').value.trim();
-  const checkin = document.getElementById('fCheckin').value;
-  const checkout= document.getElementById('fCheckout').value;
-
-  if (!asset || !nume || !checkin || !checkout) { toast('⚠ Completează câmpurile obligatorii', 'error'); return; }
-  if (new Date(checkout) <= new Date(checkin))   { toast('⚠ Check-out trebuie să fie după Check-in', 'error'); return; }
-
-  const pret  = parseFloat(document.getElementById('fPret').value)  || 0;
-  const avans = parseFloat(document.getElementById('fAvans').value) || 0;
-
-  const r = {
-    id: editingId || (Date.now().toString(36) + Math.random().toString(36).substr(2)),
-    asset, type: getType(asset), nume,
-    tel: document.getElementById('fTel').value.trim(),
-    persoane: parseInt(document.getElementById('fPersoane').value) || 1,
-    checkin, checkout, pret, avans,
-    rest: Math.max(0, pret - avans),
-    avansOk: document.getElementById('fAvansOk').checked,
-    note: document.getElementById('fNote').value.trim(),
-    createdAt: editingId ? (reservations.find(x => x.id === editingId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
-  };
-
-  const btn = document.getElementById('btnSave');
-  btn.disabled = true; btn.textContent = '⏳ Se salvează...';
+// ── LOAD ALL from Sheets ──
+async function ldAll(){
+  // Load prices from localStorage
+  try{const d=localStorage.getItem(PK);if(d)PR=JSON.parse(d);}catch(e){}
+  // Load rezervari + cheltuieli from Sheets
   setSyncing(true);
-
-  try {
-    await apiPost({ action: 'save', reservation: r });
-    // Update local immediately
-    if (editingId) {
-      const idx = reservations.findIndex(x => x.id === editingId);
-      reservations[idx] = r;
-    } else {
-      reservations.push(r);
+  try{
+    const data=await apiGet();
+    if(data.ok){
+      RS=data.rezervari||[];
+      EX=data.cheltuieli||[];
+      // Fix types
+      RS=RS.map(r=>({...r,pret:parseFloat(r.pret)||0,avans:parseFloat(r.avans)||0,rest:parseFloat(r.rest)||0,pretStd:parseFloat(r.pretStd)||0,pescari:parseInt(r.pescari)||0,persoane:parseInt(r.persoane)||1}));
+      EX=EX.map(e=>({...e,suma:parseFloat(e.suma)||0}));
     }
-    closeModal();
-    refreshAll();
-    toast('✓ Rezervare salvată!', 'success');
-  } catch(e) {
-    toast('⚠ Eroare la salvare: ' + e.message, 'error');
-  } finally {
-    btn.disabled = false; btn.textContent = '💾 Salvează';
-    setSyncing(false);
-  }
+  }catch(err){
+    console.error('Load error:',err);
+    toast('⚠ Eroare la încărcare. Date locale.','err');
+    // Fallback to localStorage
+    try{const d=localStorage.getItem(SK);if(d)RS=JSON.parse(d);}catch(e){RS=[];}
+    try{const d=localStorage.getItem(EK);if(d)EX=JSON.parse(d);}catch(e){EX=[];}
+  }finally{setSyncing(false);}
 }
 
-async function deleteReservation() {
-  if (!editingId) return;
-  const r = reservations.find(x => x.id === editingId);
-  if (!confirm(`Ștergi rezervarea: ${r?.nume} — ${r?.asset}?`)) return;
-
+// ── SAVE rezervare ──
+async function svD(){
+  // Also keep local backup
+  localStorage.setItem(SK,JSON.stringify(RS));
+}
+async function svR_toSheets(r){
   setSyncing(true);
-  try {
-    await apiPost({ action: 'delete', id: editingId });
-    reservations = reservations.filter(x => x.id !== editingId);
-    closeModal(); refreshAll();
-    toast('✓ Rezervare ștearsă', 'success');
-  } catch(e) {
-    toast('⚠ Eroare la ștergere: ' + e.message, 'error');
-  } finally {
-    setSyncing(false);
-  }
+  try{ await apiPost({action:'save_rez',data:{...r,createdAt:r.createdAt||new Date().toISOString()}}); }
+  catch(err){ toast('⚠ Eroare salvare. Date locale păstrate.','err'); }
+  finally{ setSyncing(false); }
+}
+async function delR_fromSheets(id){
+  setSyncing(true);
+  try{ await apiPost({action:'delete_rez',id}); }
+  catch(err){ toast('⚠ Eroare ștergere.','err'); }
+  finally{ setSyncing(false); }
 }
 
-// ═══════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════
-function initCalendar() { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); }
-function prevMonth() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
-function nextMonth() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
-function goToday()   { const n = new Date(); calYear = n.getFullYear(); calMonth = n.getMonth(); renderCalendar(); }
-
-function renderCalendar() {
-  document.getElementById('monthLabel').textContent = `${MONTHS_RO[calMonth]} ${calYear}`;
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const today = new Date(); today.setHours(0,0,0,0);
-  const grid = document.getElementById('calendarGrid');
-  grid.innerHTML = '';
-
-  // Header
-  const hRow = document.createElement('div');
-  hRow.className = 'cal-header-row';
-  const lbl = document.createElement('div'); lbl.className = 'cal-asset-label'; lbl.textContent = 'Asset / Zi';
-  hRow.appendChild(lbl);
-  const dRow = document.createElement('div'); dRow.className = 'cal-days-row';
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dt = new Date(calYear, calMonth, d);
-    const dow = (dt.getDay() + 6) % 7;
-    const isToday = dt.getTime() === today.getTime();
-    const dh = document.createElement('div');
-    dh.className = 'cal-day-header' + (isToday ? ' today-col' : '') + (dow >= 5 ? ' weekend' : '');
-    dh.innerHTML = `<div style="font-weight:700">${d}</div><div style="font-size:9px">${DAYS_SHORT[dow]}</div>`;
-    dRow.appendChild(dh);
-  }
-  hRow.appendChild(dRow);
-  grid.appendChild(hRow);
-
-  const groups = [
-    { label: '🏠 Cabănuțe', assets: ALL_ASSETS.slice(0,8) },
-    { label: '⛵ Pontoane', assets: ALL_ASSETS.slice(8,11) },
-    { label: '🔥 Wellness', assets: [ALL_ASSETS[11]] },
-    { label: '🛏 Pensiune', assets: ALL_ASSETS.slice(12) },
+// ── SAVE cheltuiala ──
+async function svE(){
+  localStorage.setItem(EK,JSON.stringify(EX));
+}
+async function svE_toSheets(e){
+  setSyncing(true);
+  try{ await apiPost({action:'save_exp',data:{...e,createdAt:e.createdAt||new Date().toISOString()}}); }
+  catch(err){ toast('⚠ Eroare salvare cheltuială.','err'); }
+  finally{ setSyncing(false); }
+}
+async function delE_fromSheets(id){
+  setSyncing(true);
+  try{ await apiPost({action:'delete_exp',id}); }
+  catch(err){ toast('⚠ Eroare ștergere cheltuială.','err'); }
+  finally{ setSyncing(false); }
+}
+function gId(){return Date.now().toString(36)+Math.random().toString(36).substr(2,5);}
+function pd(n){return String(n).padStart(2,'0');}
+function seed(){
+  const n=new Date(),y=n.getFullYear(),m=n.getMonth(),d=n.getDate();
+  const dt=(mo,dy,h=14)=>`${y}-${pd(mo+1)}-${pd(dy)}T${pd(h)}:00`;
+  RS=[
+    {id:gId(),asset:'Cabănuța 1',type:'cabana',nume:'Andrei Mureșan',tel:'0745123456',persoane:3,checkin:dt(m,10),checkout:dt(m,13,11),pret:1500,avans:300,rest:1200,payStatus:'avans',pretStd:1500,pescari:0,cnp:'',actSerie:'',actAut:'',note:'Aniversare',createdAt:new Date().toISOString()},
+    {id:gId(),asset:'Cabănuța 3',type:'cabana',nume:'Maria Ionescu',tel:'0722987654',persoane:2,checkin:dt(m,14),checkout:dt(m,16,11),pret:1000,avans:1000,rest:0,payStatus:'paid',dataPlata:dt(m,14).slice(0,10),pretStd:1200,pescari:0,cnp:'2850312123456',actSerie:'CJ 123456',actAut:'SPCLEP Cluj',note:'Discount 200 RON',createdAt:new Date().toISOString()},
+    {id:gId(),asset:'Ponton 2',type:'ponton',nume:'Ioan Sabău',tel:'0766543210',persoane:4,checkin:dt(m,d),checkout:dt(m,d+1,11),pret:240,avans:0,rest:240,payStatus:'none',pretStd:240,pescari:3,cnp:'',actSerie:'',actAut:'',note:'',createdAt:new Date().toISOString()},
+    {id:gId(),asset:'Camera 2',type:'pensiune',nume:'Elena Pop',tel:'0733456789',persoane:2,checkin:dt(m,d),checkout:dt(m,d+2,11),pret:500,avans:250,rest:250,payStatus:'avans',pretStd:500,pescari:0,cnp:'',actSerie:'',actAut:'',note:'',createdAt:new Date().toISOString()},
+    {id:gId(),asset:'Saună & Ciubăr',type:'sauna',nume:'Radu Vlad',tel:'0788123456',persoane:4,checkin:dt(m,d+1),checkout:dt(m,d+1,18),pret:150,avans:150,rest:0,payStatus:'paid',pretStd:150,pescari:0,cnp:'',actSerie:'',actAut:'',note:'',createdAt:new Date().toISOString()},
+    {id:gId(),asset:'Cabănuța 6',type:'cabana',nume:'Dan Moldovan',tel:'0744321654',persoane:5,checkin:dt(m,d-3),checkout:dt(m,d+1,11),pret:1800,avans:500,rest:1300,payStatus:'avans',pretStd:2000,pescari:0,cnp:'1800515123456',actSerie:'MS 654321',actAut:'SPCLEP TgM',note:'Discount 200 RON',createdAt:new Date().toISOString()}
   ];
+  EX=[
+    {id:gId(),date:new Date().toISOString().slice(0,10),cat:'detergenti',suma:145,bon:'BON-001',desc:'Detergenți Lidl + mopuri'},
+    {id:gId(),date:new Date().toISOString().slice(0,10),cat:'lenjerii',suma:320,bon:'FACT-001',desc:'Spălat 16 seturi lenjerii'}
+  ];
+  svD();svE();
+}
+let tTmr;
+function toast(m,t='ok'){const e=document.getElementById('tst');e.textContent=m;e.className='show '+t;clearTimeout(tTmr);tTmr=setTimeout(()=>e.className='',3000);}
+function swP(t){
+  // Protected tabs - require password
+  if(!adm){showGate(t);return;}
+  sw(t);
+}
+function showGate(targetTab){
+  pendingTab=targetTab;
+  document.getElementById('gateOv').classList.add('open');
+  setTimeout(()=>document.getElementById('gateInp').focus(),100);
+}
+function gateLogin(){
+  if(document.getElementById('gateInp').value===PASS){
+    adm=true;
+    document.getElementById('gateOv').classList.remove('open');
+    document.getElementById('gateInp').value='';
+    document.getElementById('gateErr').textContent='';
+    document.getElementById('admLck').style.display='none';
+    document.getElementById('admCnt').style.display='block';
+    ldPrI();rEx();populateFilters2();
+    sw('admin');
+    pendingTab=null;
+  } else {
+    document.getElementById('gateErr').textContent='Parolă incorectă.';
+    document.getElementById('gateInp').value='';
+  }
+}
+function sw(t){
+  cTab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['calendar','list','today','reports','stats','admin'][i]===t));
+  document.querySelectorAll('.vc').forEach(v=>v.classList.remove('active'));
+  document.getElementById('vc-'+t).classList.add('active');
+  if(t==='calendar')rCal();if(t==='list')rL();if(t==='today')rTd();if(t==='reports')rRp();if(t==='stats')rSt();
+  if(t==='admin'&&adm){aTab('list');}
+}
+function rfAll(){if(cTab==='calendar')rCal();if(cTab==='list')rL();if(cTab==='today')rTd();if(cTab==='reports')rRp();if(cTab==='stats')rSt();}
+// ADMIN
+function chkP(){
+  const v=document.getElementById('lkInp').value;
+  if(v===PASS){adm=true;document.getElementById('admLck').style.display='none';document.getElementById('admCnt').style.display='block';ldPrI();rEx();document.getElementById('lkErr').textContent='';document.getElementById('lkInp').value='';}
+  else{document.getElementById('lkErr').textContent='Parolă incorectă.';document.getElementById('lkInp').value='';}
+}
+function lkAdm(){adm=false;document.getElementById('admLck').style.display='flex';document.getElementById('admCnt').style.display='none';toast('🔒 Panou blocat');}
+function aTab(t){
+  ['list','today','reports','stats','prices','expenses'].forEach(x=>{
+    const c=document.getElementById('at-c-'+x);
+    if(c) c.style.display=x===t?'block':'none';
+    const b=document.getElementById('at-'+x);
+    if(b) b.classList.toggle('active',x===t);
+  });
+  if(t==='list') rL2();
+  if(t==='today') rTd2();
+  if(t==='reports') rRp2();
+  if(t==='stats') rSt2();
+  if(t==='expenses') rEx();
+}
+function ldPrI(){document.getElementById('pc1').value=PR.c[1];document.getElementById('pc2').value=PR.c[2];document.getElementById('pc3').value=PR.c[3];document.getElementById('pp').value=PR.p;document.getElementById('psa').value=PR.s;['1','2','3','4','5','6'].forEach(i=>document.getElementById('pn'+i).value=PR.n['Camera '+i]);}
+function svPr(){PR.c[1]=+document.getElementById('pc1').value||700;PR.c[2]=+document.getElementById('pc2').value||600;PR.c[3]=+document.getElementById('pc3').value||500;PR.p=+document.getElementById('pp').value||80;PR.s=+document.getElementById('psa').value||150;['1','2','3','4','5','6'].forEach(i=>PR.n['Camera '+i]=+document.getElementById('pn'+i).value||250);svPRD();toast('✓ Prețuri salvate!');}
+// EXPENSES
+function addEx(){
+  const dt=document.getElementById('ed').value,cat=document.getElementById('ec').value,suma=parseFloat(document.getElementById('es').value)||0,bon=document.getElementById('eb').value.trim(),desc=document.getElementById('edesc').value.trim();
+  if(!dt||!suma){toast('⚠ Data și suma sunt obligatorii','err');return;}
+  const newEx={id:gId(),date:dt,cat,suma,bon,desc,createdAt:new Date().toISOString()};
+  EX.push(newEx);svE();
+  document.getElementById('es').value='';document.getElementById('eb').value='';document.getElementById('edesc').value='';
+  rEx();toast('✓ Cheltuială adăugată!');
+  svE_toSheets(newEx);
+}
+function delEx(id){if(!confirm('Ștergi această cheltuială?'))return;EX=EX.filter(e=>e.id!==id);svE();rEx();toast('✓ Cheltuială ștearsă');delE_fromSheets(id);}
+function rEx(){
+  const f=document.getElementById('exf').value;
+  const {s,e}=getPR(f==='all'?null:f);
+  const list=f==='all'?EX:EX.filter(ex=>{const d=new Date(ex.date);d.setHours(0,0,0,0);return d>=s&&d<=e;});
+  const el=document.getElementById('exLst');
+  if(!list.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--tx2)">Nicio cheltuială.</div>';return;}
+  const tot=list.reduce((s,e)=>s+e.suma,0);
+  const cc={detergenti:'rgba(78,158,107,.15)',lenjerii:'rgba(46,107,158,.15)',achizitii:'rgba(201,162,39,.15)',altele:'rgba(139,152,176,.1)'};
+  const ct={detergenti:'#7bc4a0',lenjerii:'#5a9fd4',achizitii:'#e8c14a',altele:'#8b98b0'};
+  el.innerHTML=list.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(ex=>`
+    <div class="exrow">
+      <div style="flex:0 0 78px;font-size:11px;color:var(--tx2)">${ex.date}</div>
+      <div style="flex:0 0 110px"><span style="background:${cc[ex.cat]||cc.altele};color:${ct[ex.cat]||ct.altele};padding:2px 6px;border-radius:9px;font-size:10px;font-weight:600">${ECATS[ex.cat]||ex.cat}</span></div>
+      <div style="flex:1;font-size:12px">${ex.desc||'—'}${ex.bon?' <span style="font-size:10px;color:var(--tx3)">· '+ex.bon+'</span>':''}</div>
+      <div style="font-weight:600;color:var(--or);white-space:nowrap">${ex.suma.toLocaleString('ro-RO')} RON</div>
+      <button class="btn btn-s btn-sm" onclick="delEx('${ex.id}')">🗑</button>
+    </div>
+  `).join('')+`<div class="exrow" style="background:var(--sf2)"><div style="flex:1;font-weight:700">Total cheltuieli</div><div style="font-weight:700;color:var(--rd)">${tot.toLocaleString('ro-RO')} RON</div><div style="width:36px"></div></div>`;
+}
+// PERIOD
+function getPR(p){
+  if(!p)return{s:new Date(0),e:new Date(9999,0,1)};
+  const now=new Date();now.setHours(0,0,0,0);const dow=(now.getDay()+6)%7;
+  let s,e;
+  if(p==='week'){s=new Date(now);s.setDate(s.getDate()-dow);e=new Date(s);e.setDate(e.getDate()+6);}
+  else if(p==='lastweek'){s=new Date(now);s.setDate(s.getDate()-dow-7);e=new Date(s);e.setDate(e.getDate()+6);}
+  else if(p==='month'){s=new Date(now.getFullYear(),now.getMonth(),1);e=new Date(now.getFullYear(),now.getMonth()+1,0);}
+  else{s=new Date(now.getFullYear(),now.getMonth()-1,1);e=new Date(now.getFullYear(),now.getMonth(),0);}
+  return{s,e};
+}
+// MODAL
 
-  groups.forEach(group => {
-    const gh = document.createElement('div'); gh.className = 'group-header'; gh.textContent = group.label;
-    grid.appendChild(gh);
+function makeAssetSelect(val, idx){
+  const wrap = document.createElement('div');
+  wrap.style.cssText='display:flex;align-items:center;gap:6px';
+  wrap.id='assetRow_'+idx;
+  const sel = document.createElement('select');
+  sel.style.cssText='flex:1;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 10px;border-radius:7px;font-family:"DM Sans",sans-serif;font-size:14px;outline:none';
+  sel.innerHTML='<optgroup label="🏠 Cabănuțe (ponton inclus)"><option>Cabănuța 1</option><option>Cabănuța 2</option><option>Cabănuța 3</option><option>Cabănuța 4</option><option>Cabănuța 5</option><option>Cabănuța 6</option><option>Cabănuța 7</option><option>Cabănuța 8</option></optgroup><optgroup label="⛵ Pontoane libere"><option>Ponton 1</option><option>Ponton 2</option><option>Ponton 3</option></optgroup><optgroup label="🎣 Ponton cabănuță"><option>Ponton Cabănuța 1</option><option>Ponton Cabănuța 2</option><option>Ponton Cabănuța 3</option><option>Ponton Cabănuța 4</option><option>Ponton Cabănuța 5</option><option>Ponton Cabănuța 6</option><option>Ponton Cabănuța 7</option><option>Ponton Cabănuța 8</option></optgroup><optgroup label="🔥 Wellness"><option>Saună &amp; Ciubăr</option></optgroup><optgroup label="🛏 Pensiune"><option>Camera 1</option><option>Camera 2</option><option>Camera 3</option><option>Camera 4</option><option>Camera 5</option><option>Camera 6</option></optgroup>';
+  sel.onchange=()=>onAC();
+  if(val) sel.value=val;
+  wrap.appendChild(sel);
+  if(idx>0){
+    const rm=document.createElement('button');
+    rm.type='button';rm.textContent='✕';
+    rm.style.cssText='background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center';
+    rm.onclick=()=>{wrap.remove();onAC();};
+    wrap.appendChild(rm);
+  }
+  return wrap;
+}
 
-    group.assets.forEach(asset => {
-      const type = getType(asset);
-      const colors = ASSET_COLORS[type];
-      const row = document.createElement('div'); row.className = 'cal-row';
+function addAssetRow(){
+  const list=document.getElementById('assetsList');
+  const idx=list.children.length;
+  list.appendChild(makeAssetSelect('Cabănuța 1',idx));
+  onAC();
+}
 
-      const nameCell = document.createElement('div'); nameCell.className = 'cal-asset-name';
-      nameCell.innerHTML = `<span class="asset-dot ${colors.dotClass}"></span><span style="font-size:12px">${asset}</span>`;
-      row.appendChild(nameCell);
+function getSelectedAssets(){
+  const list=document.getElementById('assetsList');
+  return Array.from(list.querySelectorAll('select')).map(s=>s.value).filter(Boolean);
+}
 
-      const cells = document.createElement('div'); cells.className = 'cal-cells';
+function initAssets(vals){
+  const list=document.getElementById('assetsList');
+  list.innerHTML='';
+  const arr=vals&&vals.length?vals:['Cabănuța 1'];
+  arr.forEach((v,i)=>list.appendChild(makeAssetSelect(v,i)));
+}
 
-      for (let d = 1; d <= daysInMonth; d++) {
-        const dt = new Date(calYear, calMonth, d);
-        const isToday = dt.getTime() === today.getTime();
-        const cell = document.createElement('div');
-        cell.className = 'cal-cell' + (isToday ? ' today-col' : '');
-        cell.addEventListener('click', () => openModal(null, asset, new Date(calYear, calMonth, d)));
-        cells.appendChild(cell);
+function openModal(id=null,preA=null,preD=null){
+  eId=id;aP=0;
+  document.getElementById('mTtl').textContent=id?'Editează rezervarea':'Rezervare nouă';
+  document.getElementById('bDel').style.display=id?'flex':'none';
+  document.getElementById('dscBdg').style.display='none';document.getElementById('pStdInfo').textContent='';
+  if(id){
+    const r=RS.find(x=>x.id===id);if(!r)return;
+    initAssets([r.asset]);document.getElementById('fNm').value=r.nume;document.getElementById('fTl').value=r.tel||'';document.getElementById('fPs').value=r.persoane||2;
+    document.getElementById('fCI').value=r.checkin?r.checkin.slice(0,10):'';document.getElementById('fCO').value=r.checkout?r.checkout.slice(0,10):'';
+    document.getElementById('fSD').value=r.checkin?r.checkin.slice(0,10):'';document.getElementById('fSO').value=r.checkin?r.checkin.slice(11,16):'14:00';
+    document.getElementById('fPesc').value=r.pescari||1;document.getElementById('fPr').value=r.pret||'';document.getElementById('fAv').value=r.avans||'';document.getElementById('fRst').value=r.rest||'';document.getElementById('fDP').value=r.dataPlata||'';
+    document.getElementById('fCNP').value=r.cnp||'';document.getElementById('fAct').value=r.actSerie||'';document.getElementById('fAut').value=r.actAut||'';document.getElementById('fNt').value=r.note||'';
+    sPay(r.payStatus||'none',false);onAC();
+    if(r.pretStd&&r.pret!==r.pretStd){document.getElementById('dscBdg').style.display='inline-flex';document.getElementById('pStdInfo').textContent=`Preț standard: ${r.pretStd} RON · Diferență: ${r.pret-r.pretStd} RON`;}
+  } else {
+    initAssets(preA?[preA]:['Cabănuța 1']);document.getElementById('fNm').value='';document.getElementById('fTl').value='';document.getElementById('fPs').value=2;
+    const b=preD?new Date(preD):new Date();
+    document.getElementById('fCI').value=dStr(b);const out=new Date(b);out.setDate(out.getDate()+1);document.getElementById('fCO').value=dStr(out);
+    document.getElementById('fSD').value=dStr(b);document.getElementById('fSO').value='14:00';document.getElementById('fPesc').value=1;
+    document.getElementById('fPr').value='';document.getElementById('fAv').value='';document.getElementById('fRst').value='';document.getElementById('fDP').value='';
+    document.getElementById('fCNP').value='';document.getElementById('fAct').value='';document.getElementById('fAut').value='';document.getElementById('fNt').value='';document.getElementById('dInfo').textContent='';
+    sPay('none',false);onAC();cP();
+  }
+  document.getElementById('mOv').classList.add('open');
+  setTimeout(()=>document.getElementById('fNm').focus(),100);
+}
+function clsM(){document.getElementById('mOv').classList.remove('open');eId=null;}
+document.getElementById('mOv').addEventListener('click',e=>{if(e.target===e.currentTarget)clsM();});
+function onAC(){
+  const assets=getSelectedAssets();
+  const a=assets[0]||'Cabănuța 1';
+  const t=gT2(a),iS=t==='sauna',iP=t==='ponton'||t==='ponton-cabana';
+  document.getElementById('nDR').style.display=iS?'none':'block';document.getElementById('sDR').style.display=iS?'block':'none';
+  document.getElementById('pescSec').style.display=iP?'block':'none';
+  if(iP)document.getElementById('pescNote').textContent=t==='ponton-cabana'?'Ponton cabănuță — disponibil când cabana e liberă · 80 RON/pescar/zi':'Ponton liber · 80 RON/pescar/zi · 1 însoțitor gratuit';
+  cP();
+}
+function sPay(s,upd=true){
+  pSt=s;['none','avans','paid'].forEach(x=>document.getElementById('ps-'+x).classList.toggle('active',x===s));
+  if(upd){
+    if(s==='paid'){const p=parseFloat(document.getElementById('fPr').value)||0;document.getElementById('fAv').value=p||'';document.getElementById('fRst').value=0;if(!document.getElementById('fDP').value)document.getElementById('fDP').value=dStr(new Date());}
+    if(s==='none'){document.getElementById('fAv').value='';document.getElementById('fRst').value='';}
+    cR();
+  }
+}
+function calcAP(asset,ci,co,pesc){
+  const t=gT2(asset);if(!ci||!co)return{p:0,b:''};
+  const days=Math.round((new Date(co)-new Date(ci))/86400000);if(days<=0)return{p:0,b:''};
+  let p=0,lines=[];
+  if(t==='cabana'){const r=days>=3?PR.c[3]:days===2?PR.c[2]:PR.c[1];p=r*days;lines.push(`${days} zi${days>1?'le':''} × ${r} RON/zi`);lines.push('✓ Ponton cabănuță inclus');}
+  else if(t==='ponton'||t==='ponton-cabana'){const ps=parseInt(pesc)||1;p=ps*PR.p*days;lines.push(`${ps} pescari × ${PR.p} RON × ${days} zi${days>1?'le':''}`);if(t==='ponton-cabana')lines.push('🎣 Ponton cabănuță — cabana e liberă');}
+  else if(t==='sauna'){p=PR.s;lines.push(`Sesiune fixă — ${PR.s} RON`);}
+  else{const r=PR.n[asset]||250;p=r*days;lines.push(`${days} noapte${days>1?'ți':''} × ${r} RON/noapte`);}
+  return{p,b:lines.join('\n')};
+}
+function cP(){
+  const assets=getSelectedAssets();const a=assets[0]||'Cabănuța 1';const t=gT2(a),iS=t==='sauna',iP=t==='ponton'||t==='ponton-cabana';
+  let ci,co;if(iS){ci=document.getElementById('fSD').value;co=ci;}else{ci=document.getElementById('fCI').value;co=document.getElementById('fCO').value;}
+  const pesc=iP?parseInt(document.getElementById('fPesc').value)||1:0;
+  if(!iS&&ci&&co){const d=Math.round((new Date(co)-new Date(ci))/86400000);document.getElementById('dInfo').textContent=d>0?`📅 ${d} zi${d>1?'le':''} · Check-in 14:00 · Check-out 11:00`:'⚠️ Check-out după check-in!';}
+  else if(iS&&ci){document.getElementById('dInfo').textContent=`🔥 Sesiune · ${ci} ora ${document.getElementById('fSO').value}`;}
+  const{p,b}=calcAP(a,ci,co,pesc);aP=p;
+  const prev=document.getElementById('pPrev');
+  if(p>0){prev.style.display='block';document.getElementById('pAmt').textContent=p.toLocaleString('ro-RO')+' RON';document.getElementById('pBrk').innerHTML=b.replace(/\n/g,'<br>');if(!document.getElementById('fPr').value)document.getElementById('fPr').value=p;}
+  else prev.style.display='none';
+  cR();
+}
+function onPrEdit(){
+  const m=parseFloat(document.getElementById('fPr').value)||0;
+  if(aP>0&&m!==aP){document.getElementById('dscBdg').style.display='inline-flex';document.getElementById('pStdInfo').textContent=`Preț standard: ${aP} RON · Diferență: ${m>0?'':''}${m-aP} RON`;}
+  else{document.getElementById('dscBdg').style.display='none';document.getElementById('pStdInfo').textContent='';}
+  cR();
+}
+function cR(){const p=parseFloat(document.getElementById('fPr').value)||0,a=parseFloat(document.getElementById('fAv').value)||0;document.getElementById('fRst').value=Math.max(0,p-a)||'';}
+function svR(){
+  const assets=getSelectedAssets();
+  const a=assets[0]||'Cabănuța 1';
+  const nm=document.getElementById('fNm').value.trim(),t=gT2(a),iS=t==='sauna';
+  let ci,co;if(iS){ci=document.getElementById('fSD').value;co=ci;}else{ci=document.getElementById('fCI').value;co=document.getElementById('fCO').value;}
+  if(!a||!nm||!ci){toast('⚠ Completează câmpurile obligatorii','err');return;}
+  if(!iS&&new Date(co)<=new Date(ci)){toast('⚠ Check-out după check-in!','err');return;}
+  const ora=iS?document.getElementById('fSO').value:'';
+  const checkin=iS?`${ci}T${ora||'14:00'}`:`${ci}T14:00`;
+  const checkout=iS?`${ci}T18:00`:`${co}T11:00`;
+  const pr=parseFloat(document.getElementById('fPr').value)||0,av=parseFloat(document.getElementById('fAv').value)||0;
+  const r={id:eId||gId(),asset:a,type:t,nume:nm,tel:document.getElementById('fTl').value.trim(),persoane:parseInt(document.getElementById('fPs').value)||1,checkin,checkout,pret:pr,avans:av,rest:Math.max(0,pr-av),payStatus:pSt,dataPlata:document.getElementById('fDP').value||'',pretStd:aP||pr,pescari:parseInt(document.getElementById('fPesc').value)||0,cnp:document.getElementById('fCNP').value.trim(),actSerie:document.getElementById('fAct').value.trim(),actAut:document.getElementById('fAut').value.trim(),note:document.getElementById('fNt').value.trim(),createdAt:eId?(RS.find(x=>x.id===eId)?.createdAt||new Date().toISOString()):new Date().toISOString()};
+  if(eId){
+    const i=RS.findIndex(x=>x.id===eId);RS[i]=r;
+    svD();
+    svR_toSheets(r).then(()=>{ rfAll(); });
+    clsM();rfAll();toast('✓ Rezervare actualizată!');
+  } else {
+    const newRezs=[];
+    assets.forEach((asset)=>{
+      const rCopy={...r, id:gId(), asset:asset, type:gT2(asset)};
+      if(assets.length>1){
+        const {p}=calcAP(asset, iS?document.getElementById('fSD').value:document.getElementById('fCI').value, iS?document.getElementById('fSD').value:document.getElementById('fCO').value, parseInt(document.getElementById('fPesc').value)||0);
+        if(p>0){rCopy.pret=p;rCopy.pretStd=p;rCopy.rest=p;}
       }
-
-      // Reservation bars
-      reservations.filter(r => r.asset === asset).forEach(res => {
-        const ci = new Date(res.checkin);
-        const co = new Date(res.checkout);
-        const mStart = new Date(calYear, calMonth, 1);
-        const mEnd   = new Date(calYear, calMonth, daysInMonth, 23, 59, 59);
-        if (ci > mEnd || co < mStart) return;
-
-        const startDay = ci >= mStart ? ci.getDate() : 1;
-        const endDay   = co <= mEnd   ? co.getDate() : daysInMonth;
-        const leftPct  = ((startDay - 1) / daysInMonth) * 100;
-        const widthPct = ((endDay - startDay + 1) / daysInMonth) * 100;
-
-        const bar = document.createElement('div');
-        bar.className = `res-bar ${colors.barClass}`;
-        bar.style.left  = `calc(${leftPct}% + 2px)`;
-        bar.style.width = `calc(${widthPct}% - 4px)`;
-        bar.textContent = res.nume;
-        bar.addEventListener('click', e => { e.stopPropagation(); openModal(res.id); });
-        bar.addEventListener('mouseenter', e => showTooltip(e, res));
-        bar.addEventListener('mousemove',  moveTooltip);
-        bar.addEventListener('mouseleave', hideTooltip);
+      RS.push(rCopy);
+      newRezs.push(rCopy);
+    });
+    svD();clsM();rfAll();
+    toast(assets.length>1?`✓ ${assets.length} rezervări salvate!`:'✓ Rezervare salvată!');
+    Promise.all(newRezs.map(rz=>svR_toSheets(rz))).then(()=>rfAll());
+  }
+}
+function delR(){if(!eId)return;const r=RS.find(x=>x.id===eId);if(!confirm(`Ștergi: ${r?.nume} — ${r?.asset}?`))return;const delId=eId;RS=RS.filter(x=>x.id!==eId);svD();clsM();rfAll();toast('✓ Rezervare ștearsă');delR_fromSheets(delId);}
+// CALENDAR
+function initCal(){const n=new Date();cY=n.getFullYear();cM=n.getMonth();}
+function pM(){cM--;if(cM<0){cM=11;cY--;}rCal();}function nM(){cM++;if(cM>11){cM=0;cY++;}rCal();}function gT(){const n=new Date();cY=n.getFullYear();cM=n.getMonth();rCal();}
+function rCal(){
+  document.getElementById('mlbl').textContent=`${MONTHS[cM]} ${cY}`;
+  const dim=new Date(cY,cM+1,0).getDate(),tod=new Date();tod.setHours(0,0,0,0);
+  const g=document.getElementById('calGrid');g.innerHTML='';
+  const hr=document.createElement('div');hr.className='cal-hdr';
+  const l=document.createElement('div');l.className='cal-albl';l.textContent='Asset / Zi';hr.appendChild(l);
+  const dr=document.createElement('div');dr.className='cal-drow';
+  for(let d=1;d<=dim;d++){const dt=new Date(cY,cM,d);const dow=(dt.getDay()+6)%7;const dh=document.createElement('div');dh.className='cal-dh'+(dt.getTime()===tod.getTime()?' tc':'')+(dow>=5?' we':'');dh.innerHTML=`<div style="font-weight:700">${d}</div><div style="font-size:9px">${DAYS[dow]}</div>`;dr.appendChild(dh);}
+  hr.appendChild(dr);g.appendChild(hr);
+  const groups=[{l:'🏠 Cabănuțe (ponton inclus)',a:ALL.slice(0,8)},{l:'⛵ Pontoane libere',a:ALL.slice(8,11)},{l:'🎣 Pontoane cabănuțe',a:ALL.slice(11,19)},{l:'🔥 Wellness',a:[ALL[19]]},{l:'🛏 Pensiune',a:ALL.slice(20)}];
+  groups.forEach(({l,a})=>{
+    const gh=document.createElement('div');gh.className='ghdr';gh.textContent=l;g.appendChild(gh);
+    a.forEach(asset=>{
+      const t=gT2(asset);const cl=COLS[t];
+      const row=document.createElement('div');row.className='cal-row';
+      const nc=document.createElement('div');nc.className='cal-an';nc.innerHTML=`<span class="adot ${cl.d}"></span><span style="font-size:11px">${asset}</span>`;row.appendChild(nc);
+      const cells=document.createElement('div');cells.className='cal-cells';
+      for(let d=1;d<=dim;d++){const dt=new Date(cY,cM,d);const cell=document.createElement('div');cell.className='cal-cell'+(dt.getTime()===tod.getTime()?' tc':'');cell.addEventListener('click',()=>openModal(null,asset,new Date(cY,cM,d)));cells.appendChild(cell);}
+      RS.filter(r=>r.asset===asset).forEach(res=>{
+        const ci=new Date(res.checkin),co=new Date(res.checkout);
+        const mS=new Date(cY,cM,1),mE=new Date(cY,cM,dim,23,59,59);
+        if(ci>mE||co<mS)return;
+        const sd=ci>=mS?ci.getDate():1,ed=co<=mE?co.getDate():dim;
+        const lp=((sd-1)/dim)*100,wp=((ed-sd+1)/dim)*100;
+        const bar=document.createElement('div');bar.className=`rbar ${cl.b}`;
+        bar.style.left=`calc(${lp}% + 2px)`;bar.style.width=`calc(${wp}% - 4px)`;
+        bar.textContent=res.nume+(res.pretStd&&res.pret!==res.pretStd?' ⚡':'');
+        bar.addEventListener('click',e=>{e.stopPropagation();openModal(res.id);});
+        bar.addEventListener('mouseenter',e=>shTT(e,res));bar.addEventListener('mousemove',mvTT);bar.addEventListener('mouseleave',hdTT);
         cells.appendChild(bar);
       });
-
-      row.appendChild(cells);
-      grid.appendChild(row);
+      row.appendChild(cells);g.appendChild(row);
     });
   });
 }
-
-// ═══════════════════════════════════════
-// TOOLTIP
-// ═══════════════════════════════════════
-function showTooltip(e, r) {
-  const days = Math.round((new Date(r.checkout) - new Date(r.checkin)) / 86400000);
-  document.getElementById('tooltip').innerHTML = `
-    <strong>${r.nume}</strong><br>
-    <p>📱 ${r.tel||'N/A'} · 👥 ${r.persoane||'-'} pers.</p>
-    <p>📅 ${fmtFull(r.checkin)} → ${fmtFull(r.checkout)}</p>
-    <p>⏱ ${days} zile</p>
-    <p>💰 Total: ${r.pret} RON · Avans: ${r.avans} RON · Rest: ${r.rest} RON</p>
-    <p>${r.avansOk ? '✅ Avans încasat' : '⚠️ Avans neîncasat'}</p>
-    ${r.note ? `<p>📝 ${r.note}</p>` : ''}
-  `;
-  document.getElementById('tooltip').classList.add('visible');
-  moveTooltip(e);
-}
-function moveTooltip(e) {
-  const t = document.getElementById('tooltip');
-  t.style.left = Math.min(e.clientX + 14, window.innerWidth - 280) + 'px';
-  t.style.top  = Math.min(e.clientY + 14, window.innerHeight - 200) + 'px';
-}
-function hideTooltip() { document.getElementById('tooltip').classList.remove('visible'); }
-
-// ═══════════════════════════════════════
+function shTT(e,r){const d=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);document.getElementById('tt').innerHTML=`<strong>${r.nume}</strong><br><p>📱 ${r.tel||'—'} · 👥 ${r.persoane}</p><p>📅 ${fD(r.checkin)} → ${fD(r.checkout)} (${d}z)</p><p>💰 ${r.pret} RON${r.pretStd&&r.pret!==r.pretStd?' ⚡std:'+r.pretStd:''}</p><p>${pi} ${r.payStatus==='paid'?'Achitat':r.payStatus==='avans'?'Avans':'Neachitat'}</p>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<p>🎣 ${r.pescari} pescari</p>`:''}${r.note?`<p>📝 ${r.note}</p>`:''}`;document.getElementById('tt').classList.add('vis');mvTT(e);}
+function mvTT(e){const t=document.getElementById('tt');t.style.left=Math.min(e.clientX+12,window.innerWidth-245)+'px';t.style.top=Math.min(e.clientY+12,window.innerHeight-190)+'px';}
+function hdTT(){document.getElementById('tt').classList.remove('vis');}
 // LIST
-// ═══════════════════════════════════════
-function renderList() {
-  const search  = document.getElementById('searchInput').value.toLowerCase();
-  const fAsset  = document.getElementById('filterAsset').value;
-  const fStatus = document.getElementById('filterStatus').value;
-  const fAvans  = document.getElementById('filterAvans').value;
-  const now     = new Date();
-
-  const filtered = reservations.filter(r => {
-    if (search && !r.nume.toLowerCase().includes(search) && !r.asset.toLowerCase().includes(search)) return false;
-    if (fAsset && r.asset !== fAsset) return false;
-    if (fAvans === 'yes' && !r.avansOk) return false;
-    if (fAvans === 'no' && r.avansOk) return false;
-    const ci = new Date(r.checkin), co = new Date(r.checkout);
-    const st = ci <= now && co >= now ? 'active' : ci > now ? 'upcoming' : 'done';
-    if (fStatus && st !== fStatus) return false;
-    return true;
-  }).sort((a,b) => new Date(b.checkin) - new Date(a.checkin));
-
-  const el = document.getElementById('listContainer');
-  if (!filtered.length) { el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nicio rezervare găsită.</p></div>`; return; }
-
-  el.innerHTML = `<table class="res-table"><thead><tr>
-    <th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th>
-    <th class="text-center">Zile</th><th class="text-right">Total RON</th>
-    <th class="text-right">Avans</th><th class="text-right">Rest</th>
-    <th class="text-center">Avans</th><th class="text-center">Status</th><th></th>
-  </tr></thead><tbody>
-  ${filtered.map(r => {
-    const ci = new Date(r.checkin), co = new Date(r.checkout);
-    const days = Math.round((co - ci) / 86400000);
-    const colors = ASSET_COLORS[getType(r.asset)];
-    const st = ci <= now && co >= now ? 'active' : ci > now ? 'upcoming' : 'done';
-    const stBadge = st === 'active' ? '<span class="badge badge-active">● Activ</span>'
-      : st === 'upcoming' ? '<span class="badge badge-upcoming">▸ Viitor</span>'
-      : '<span class="badge badge-done">✓ Finalizat</span>';
-    return `<tr>
-      <td><span class="flex"><span class="asset-dot ${colors.dotClass}"></span>${r.asset}</span></td>
-      <td><div style="font-weight:500">${r.nume}</div>
-          ${r.tel ? `<div style="font-size:11px;color:var(--text2)">${r.tel}</div>` : ''}
-          ${r.persoane ? `<div style="font-size:11px;color:var(--text2)">👥 ${r.persoane} pers.</div>` : ''}</td>
-      <td>${fmtFull(r.checkin)}</td>
-      <td>${fmtFull(r.checkout)}</td>
-      <td class="text-center">${days}</td>
-      <td class="text-right">${r.pret ? r.pret.toLocaleString('ro-RO') : '—'}</td>
-      <td class="text-right">${r.avans ? r.avans.toLocaleString('ro-RO') : '—'}</td>
-      <td class="text-right" style="color:${r.rest>0?'var(--orange)':'var(--text2)'}">${r.rest ? r.rest.toLocaleString('ro-RO') : '0'}</td>
-      <td class="text-center">${r.avansOk ? '<span class="badge badge-avans-ok">✓ Da</span>' : '<span class="badge badge-avans-no">✗ Nu</span>'}</td>
-      <td class="text-center">${stBadge}</td>
-      <td><button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" onclick="openModal('${r.id}')">✏️</button></td>
-    </tr>`;
-  }).join('')}
-  </tbody></table>`;
+function rL(){
+  const s=document.getElementById('srch').value.toLowerCase(),fa=document.getElementById('fA').value,fs=document.getElementById('fS').value,fp=document.getElementById('fP').value,now=new Date();
+  const fl=RS.filter(r=>{if(s&&!r.nume.toLowerCase().includes(s)&&!r.asset.toLowerCase().includes(s))return false;if(fa&&r.asset!==fa)return false;if(fp&&r.payStatus!==fp)return false;const ci=new Date(r.checkin),co=new Date(r.checkout);const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';if(fs&&st!==fs)return false;return true;}).sort((a,b)=>new Date(b.checkin)-new Date(a.checkin));
+  const el=document.getElementById('lCnt');if(!fl.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px;margin-bottom:8px">📋</div><p>Nicio rezervare.</p></div>';return;}
+  const pB=r=>r.payStatus==='paid'?'<span class="bdg b-pd">🟢 Achitat</span>':r.payStatus==='avans'?'<span class="bdg b-av">🟡 Avans</span>':'<span class="bdg b-np">🔴 Neachitat</span>';
+  el.innerHTML=`<table class="rtbl"><thead><tr><th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th><th class="tc">Zile</th><th class="tr">Total</th><th class="tr">Rest</th><th class="tc">Plată</th><th class="tc">Status</th><th></th></tr></thead><tbody>
+  ${fl.map(r=>{const ci=new Date(r.checkin),co=new Date(r.checkout);const days=Math.round((co-ci)/86400000);const cl=COLS[gT2(r.asset)];const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';const stB=st==='active'?'<span class="bdg b-ac">● Activ</span>':st==='upcoming'?'<span class="bdg b-up">▸ Viitor</span>':'<span class="bdg b-dn">✓ Final</span>';const t=gT2(r.asset);const disc=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡ std:${r.pretStd}</div>`:'';return `<tr><td><span class="fx"><span class="adot ${cl.d}"></span><div>${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣 ${r.pescari}p</div>`:''}</div></span></td><td><div style="font-weight:500">${r.nume}</div>${r.tel?`<div style="font-size:11px;color:var(--tx2)">${r.tel}</div>`:''}${r.cnp?`<div style="font-size:10px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</td><td>${fFull(r.checkin)}</td><td>${fFull(r.checkout)}</td><td class="tc">${days}</td><td class="tr">${r.pret?r.pret.toLocaleString('ro-RO')+' RON':'—'}${disc}</td><td class="tr" style="color:${r.rest>0?'var(--or)':'var(--tx2)'}">${r.rest?r.rest.toLocaleString('ro-RO')+' RON':'0'}</td><td class="tc">${pB(r)}</td><td class="tc">${stB}</td><td><button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></td></tr>`;}).join('')}</tbody></table>`;
 }
-
-// ═══════════════════════════════════════
 // TODAY
-// ═══════════════════════════════════════
-function renderToday() {
-  const now = new Date(); now.setHours(0,0,0,0);
-  const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
-
-  const checkins  = reservations.filter(r => { const d = new Date(r.checkin);  d.setHours(0,0,0,0); return d.getTime() === now.getTime(); });
-  const checkouts = reservations.filter(r => { const d = new Date(r.checkout); d.setHours(0,0,0,0); return d.getTime() === now.getTime(); });
-  const staying   = reservations.filter(r => { const ci = new Date(r.checkin); ci.setHours(0,0,0,0); const co = new Date(r.checkout); co.setHours(0,0,0,0); return ci < now && co > now; });
-  const tomorrow_ = reservations.filter(r => { const d = new Date(r.checkin);  d.setHours(0,0,0,0); return d.getTime() === tomorrow.getTime(); });
-
-  const todayStr = now.toLocaleDateString('ro-RO', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
-  const section = (title, color, accent, list) => list.length === 0 ? '' : `
-    <div class="asset-group" style="margin-bottom:12px">
-      <div class="asset-group-header" style="color:${color};border-left:3px solid ${accent}">${title}</div>
-      ${list.map(r => {
-        const days = Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);
-        const colors = ASSET_COLORS[getType(r.asset)];
-        return `<div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-          <span class="asset-dot ${colors.dotClass}" style="width:10px;height:10px"></span>
-          <div style="flex:1;min-width:180px">
-            <div style="font-weight:600">${r.asset}</div>
-            <div style="font-size:12px;color:var(--text2)">${r.nume}${r.tel?' · '+r.tel:''}${r.persoane?' · 👥 '+r.persoane:''}</div>
-          </div>
-          <div style="font-size:12px;color:var(--text2)">${fmtFull(r.checkin)} → ${fmtFull(r.checkout)} (${days}z)</div>
-          <div style="font-size:12px">${r.rest>0?`<span style="color:var(--orange)">💰 Rest: ${r.rest} RON</span>`:'<span style="color:var(--accent2)">✓ Achitat</span>'}</div>
-          ${r.note?`<div style="font-size:12px;color:var(--text2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}
-          <button class="btn btn-secondary" style="padding:5px 10px;font-size:12px" onclick="openModal('${r.id}')">✏️</button>
-        </div>`;
-      }).join('')}
-    </div>`;
-
-  document.getElementById('todayContainer').innerHTML = `
-    <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:20px;color:var(--accent2)">
-      🌅 ${todayStr.charAt(0).toUpperCase()+todayStr.slice(1)}
-    </div>
-    <div class="stats-grid" style="margin-bottom:24px">
-      <div class="stat-card"><div class="label">Check-in azi</div><div class="value" style="color:var(--accent2)">${checkins.length}</div><div class="sub">sosiri</div></div>
-      <div class="stat-card"><div class="label">Check-out azi</div><div class="value" style="color:#f08080">${checkouts.length}</div><div class="sub">plecări</div></div>
-      <div class="stat-card"><div class="label">Ocupate azi</div><div class="value" style="color:var(--water2)">${staying.length+checkins.length}</div><div class="sub">assets</div></div>
-      <div class="stat-card"><div class="label">Check-in mâine</div><div class="value" style="color:var(--gold)">${tomorrow_.length}</div><div class="sub">de pregătit</div></div>
-    </div>
-    ${section('🚪 Check-out azi — curățenie necesară', '#f08080', 'var(--red)', checkouts)}
-    ${section('✅ Check-in azi — clienți care sosesc', 'var(--accent2)', 'var(--accent)', checkins)}
-    ${section('🛏 Cazați azi — rămân', 'var(--water2)', 'var(--water)', staying)}
-    ${section('📋 Check-in mâine — de pregătit', 'var(--gold)', 'var(--gold)', tomorrow_)}
-    ${!checkins.length && !checkouts.length && !staying.length ? '<div class="empty-state"><div class="icon">😌</div><p>Nicio activitate azi.</p></div>' : ''}
+function rTd(){
+  const now=new Date();now.setHours(0,0,0,0);const tom=new Date(now);tom.setDate(tom.getDate()+1);
+  const mI=(r,d)=>{const x=new Date(r.checkin);x.setHours(0,0,0,0);return x.getTime()===d.getTime();};
+  const mO=(r,d)=>{const x=new Date(r.checkout);x.setHours(0,0,0,0);return x.getTime()===d.getTime();};
+  const ci=RS.filter(r=>mI(r,now)),co=RS.filter(r=>mO(r,now)),st=RS.filter(r=>{const a=new Date(r.checkin);a.setHours(0,0,0,0);const b=new Date(r.checkout);b.setHours(0,0,0,0);return a<now&&b>now;}),tm=RS.filter(r=>mI(r,tom));
+  const tdStr=now.toLocaleDateString('ro-RO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const card=(title,color,accent,list)=>list.length===0?'':
+    `<div class="tcd"><div class="tch" style="color:${color};border-left-color:${accent}">${title}</div>
+    ${list.map(r=>{const days=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const cl=COLS[gT2(r.asset)];const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);return `<div class="tit"><span class="adot ${cl.d}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span><div style="flex:1;min-width:150px"><div style="font-weight:600">${r.asset}</div><div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''} · 👥 ${r.persoane}</div>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:11px;color:var(--tx2)">🎣 ${r.pescari} pescari</div>`:''} ${r.cnp?`<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</div><div style="font-size:12px;color:var(--tx2)">${fFull(r.checkin)} → ${fFull(r.checkout)} (${days}z)</div><div style="font-size:12px">${pi} ${r.rest>0?`<span style="color:var(--or)">Rest: ${r.rest} RON</span>`:'<span style="color:var(--ac2)">Achitat</span>'}</div>${r.note?`<div style="font-size:12px;color:var(--tx2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></div>`;}).join('')}</div>`;
+  document.getElementById('tdCnt').innerHTML=`<div class="thdr">🌅 ${tdStr.charAt(0).toUpperCase()+tdStr.slice(1)}</div><div class="sgrid" style="margin-bottom:14px"><div class="sc cg"><div class="sl">Check-in azi</div><div class="sv" style="color:var(--ac2)">${ci.length}</div><div class="ss">sosiri</div></div><div class="sc cr"><div class="sl">Check-out azi</div><div class="sv" style="color:#f08080">${co.length}</div><div class="ss">curățenie</div></div><div class="sc cb"><div class="sl">Ocupate azi</div><div class="sv" style="color:var(--wt2)">${st.length+ci.length}</div><div class="ss">assets</div></div><div class="sc cy"><div class="sl">Mâine</div><div class="sv" style="color:var(--gd2)">${tm.length}</div><div class="ss">de pregătit</div></div></div>${card('🚪 Check-out azi — curățenie','#f08080','var(--rd)',co)}${card('✅ Check-in azi — sosesc','var(--ac2)','var(--ac)',ci)}${card('🛏 Rămân azi','var(--wt2)','var(--wt)',st)}${card('📋 Check-in mâine','var(--gd2)','var(--gd)',tm)}${!ci.length&&!co.length&&!st.length?'<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px">😌</div><p style="margin-top:8px">Zi liniștită!</p></div>':''}`;
+}
+// REPORTS
+function sP(p,btn){rPer=p;document.querySelectorAll('.rctrl .pb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rRp();}
+function sDp(p,btn){dPer=p;document.querySelectorAll('#at-c-decont .pb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rDc();}
+function rRp(){
+  const{s,e}=getPR(rPer);const pl=`${fD(s)} — ${fD(e)}`;
+  const iP=RS.filter(r=>{const ci=new Date(r.checkin);ci.setHours(0,0,0,0);const co=new Date(r.checkout);co.setHours(0,0,0,0);return ci<=e&&co>=s;});
+  const bT={cabana:0,ponton:0,sauna:0,pensiune:0};const bA={};ALL.forEach(a=>bA[a]={c:0,r:0});
+  iP.forEach(r=>{const t=r.type==='ponton-cabana'?'ponton':r.type;bT[t]=(bT[t]||0)+(r.pret||0);if(bA[r.asset]){bA[r.asset].c++;bA[r.asset].r+=(r.pret||0);}});
+  const tot=iP.reduce((s,r)=>s+(r.pret||0),0),totAv=iP.reduce((s,r)=>s+(r.avans||0),0),totRst=iP.reduce((s,r)=>s+(r.rest||0),0);
+  const disc=iP.filter(r=>r.pretStd&&r.pret!==r.pretStd),totDisc=disc.reduce((s,r)=>s+(r.pretStd-r.pret),0);
+  const mxA=Math.max(...Object.values(bA).map(x=>x.r),1);
+  const tRows=[['🏠 Cabănuțe','cabana'],['⛵ Pontoane','ponton'],['🔥 Saună & Ciubăr','sauna'],['🛏 Pensiune','pensiune']];
+  document.getElementById('rpCnt').innerHTML=`
+  <div class="rcd"><div class="rch"><div class="rct">📊 ${pl}</div><span style="font-size:12px;color:var(--tx2)">${iP.length} rez.</span></div><div class="rcb"><div class="sgrid"><div class="sc cg"><div class="sl">Venituri brute</div><div class="sv" style="font-size:18px">${tot.toLocaleString('ro-RO')} RON</div></div><div class="sc cy"><div class="sl">Avans încasat</div><div class="sv" style="font-size:18px;color:var(--gd2)">${totAv.toLocaleString('ro-RO')} RON</div></div><div class="sc cr"><div class="sl">Rest de încasat</div><div class="sv" style="font-size:18px;color:var(--or)">${totRst.toLocaleString('ro-RO')} RON</div></div><div class="sc cb"><div class="sl">Rezervări</div><div class="sv" style="font-size:18px;color:var(--wt2)">${iP.length}</div></div></div></div></div>
+  <div class="rcd"><div class="rch"><div class="rct">📈 Performanță per asset</div></div><div class="rcb">${iP.length===0?'<p style="color:var(--tx2);text-align:center;padding:14px">Nicio rezervare.</p>':ALL.filter(a=>bA[a]&&bA[a].c>0).sort((a,b)=>bA[b].r-bA[a].r).map(a=>{const t=gT2(a);const cl=COLS[t];return `<div class="arow"><span class="adot ${cl.d}" style="width:8px;height:8px;flex-shrink:0"></span><span style="flex:0 0 160px;font-size:12px">${a}</span><span style="flex:0 0 22px;font-size:11px;color:var(--tx2);text-align:center">${bA[a].c}×</span><div class="bw"><div class="bf" style="width:${bA[a].r/mxA*100}%;background:${BHEX[t]}"></div></div><span style="flex:0 0 95px;font-size:12px;font-weight:600;text-align:right">${bA[a].r.toLocaleString('ro-RO')} RON</span></div>`;}).join('')}</div></div>
+  <div class="rcd"><div class="rch"><div class="rct">👥 Oaspeți — ${pl}</div></div><div class="rcb" style="padding:0">${iP.length===0?'<p style="color:var(--tx2);text-align:center;padding:14px">Nicio rezervare.</p>':`<table class="dt"><thead><tr><th>Asset</th><th>Nume</th><th>Telefon</th><th>CNP</th><th>Act</th><th>Check-in</th><th>Check-out</th><th class="tr">RON</th><th>Plată</th></tr></thead><tbody>${iP.sort((a,b)=>new Date(a.checkin)-new Date(b.checkin)).map(r=>{const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);const disc2=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡std:${r.pretStd}</div>`:'';return `<tr><td style="font-size:12px">${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣${r.pescari}p</div>`:''}</td><td style="font-weight:500">${r.nume}</td><td style="font-size:12px">${r.tel||'—'}</td><td style="font-size:11px;color:var(--tx2)">${r.cnp||'—'}</td><td style="font-size:11px;color:var(--tx2)">${r.actSerie?r.actSerie+(r.actAut?' / '+r.actAut:''):'—'}</td><td style="font-size:12px">${fD(r.checkin)}</td><td style="font-size:12px">${fD(r.checkout)}</td><td class="tr" style="font-weight:600">${r.pret?r.pret.toLocaleString('ro-RO'):'-'}${disc2}</td><td>${pi}${r.rest>0?` <span style="font-size:10px;color:var(--or)">${r.rest}rest</span>`:''}</td></tr>`;}).join('')}<tr class="tr2"><td colspan="7"><strong>TOTAL</strong></td><td class="tr"><strong>${tot.toLocaleString('ro-RO')} RON</strong></td><td></td></tr></tbody></table>`}</div></div>
+  ${totDisc>0?`<div class="rcd"><div class="rch"><div class="rct">⚡ Discounturi aplicate — ${pl}</div><span style="font-size:12px;color:var(--or)">${totDisc.toLocaleString('ro-RO')} RON total</span></div><div class="rcb" style="padding:0"><table class="dt"><thead><tr><th>Asset</th><th>Client</th><th>Preț aplicat</th><th>Preț standard</th><th>Discount</th></tr></thead><tbody>${disc.map(r=>`<tr><td style="font-size:12px">${r.asset}</td><td>${r.nume}</td><td style="color:var(--ac2);font-weight:600">${r.pret.toLocaleString('ro-RO')} RON</td><td style="color:var(--tx2)">${r.pretStd.toLocaleString('ro-RO')} RON</td><td style="color:var(--or);font-weight:600">${(r.pretStd-r.pret).toLocaleString('ro-RO')} RON</td></tr>`).join('')}</tbody></table></div></div>`:''}
   `;
 }
-
-// ═══════════════════════════════════════
+// DECONT (in admin)
+function rDc(){
+  const{s,e}=getPR(dPer);const pl=`${fD(s)} — ${fD(e)}`;
+  const iP=RS.filter(r=>{const ci=new Date(r.checkin);ci.setHours(0,0,0,0);const co=new Date(r.checkout);co.setHours(0,0,0,0);return ci<=e&&co>=s;});
+  const pE=EX.filter(ex=>{const d=new Date(ex.date);d.setHours(0,0,0,0);return d>=s&&d<=e;});
+  const bT={cabana:0,ponton:0,sauna:0,pensiune:0};
+  iP.forEach(r=>{const t=r.type==='ponton-cabana'?'ponton':r.type;bT[t]=(bT[t]||0)+(r.pret||0);});
+  const tot=Object.values(bT).reduce((s,v)=>s+v,0),totEx=pE.reduce((s,ex)=>s+ex.suma,0);
+  const o60=Math.round(tot*SPLIT.o),a40=Math.round(tot*SPLIT.a),netO=Math.max(0,o60-totEx);
+  const tRows=[['🏠 Cabănuțe','cabana'],['⛵ Pontoane','ponton'],['🔥 Saună & Ciubăr','sauna'],['🛏 Pensiune','pensiune']];
+  document.getElementById('dcCnt').innerHTML=`
+  <div class="sgrid" style="margin-bottom:14px">
+    <div class="sc cg"><div class="sl">CA Brută</div><div class="sv" style="font-size:18px">${tot.toLocaleString('ro-RO')} RON</div></div>
+    <div class="sc cr"><div class="sl">Cheltuieli</div><div class="sv" style="font-size:18px;color:#f08080">${totEx.toLocaleString('ro-RO')} RON</div></div>
+    <div class="sc cb"><div class="sl">60% Proprietar (brut)</div><div class="sv" style="font-size:18px;color:var(--wt2)">${o60.toLocaleString('ro-RO')} RON</div></div>
+    <div class="sc cp"><div class="sl">Net proprietar</div><div class="sv" style="font-size:18px;color:#b09ad4">${netO.toLocaleString('ro-RO')} RON</div></div>
+  </div>
+  <div class="rcd"><div class="rch"><div class="rct">🧾 Decont detaliat — ${pl}</div></div>
+  <div class="rcb" style="padding:0"><table class="dt">
+    <thead><tr><th>Categorie</th><th class="tr">CA</th><th class="tr" style="color:var(--wt2)">60% Proprietar</th><th class="tr" style="color:var(--ac2)">40% Administrator</th></tr></thead>
+    <tbody>
+    ${tRows.map(([l,k])=>`<tr><td>${l}</td><td class="tr">${(bT[k]||0).toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--wt2)">${Math.round((bT[k]||0)*SPLIT.o).toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--ac2)">${Math.round((bT[k]||0)*SPLIT.a).toLocaleString('ro-RO')} RON</td></tr>`).join('')}
+    <tr class="tr2"><td><strong>TOTAL CA brută</strong></td><td class="tr"><strong>${tot.toLocaleString('ro-RO')} RON</strong></td><td class="tr" style="color:var(--wt2)"><strong>${o60.toLocaleString('ro-RO')} RON</strong></td><td class="tr" style="color:var(--ac2)"><strong>${a40.toLocaleString('ro-RO')} RON</strong></td></tr>
+    ${totEx>0?`<tr style="background:rgba(122,92,184,.06)"><td style="font-size:12px;color:var(--tx2)">💸 Cheltuieli suportate de proprietar</td><td class="tr" style="color:var(--rd);font-size:12px">-${totEx.toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--rd);font-size:12px">-${totEx.toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--tx2);font-size:12px">0</td></tr>
+    <tr class="tr2"><td><strong>NET de plătit proprietar</strong></td><td></td><td class="tr" style="color:var(--wt2)"><strong>${netO.toLocaleString('ro-RO')} RON</strong></td><td class="tr" style="color:var(--ac2)"><strong>${a40.toLocaleString('ro-RO')} RON</strong></td></tr>`:''}
+    </tbody>
+  </table></div></div>
+  ${totEx>0?`<div class="rcd" style="margin-top:12px"><div class="rch"><div class="rct">💸 Cheltuieli incluse în decont</div></div><div class="rcb" style="padding:0"><table class="dt"><thead><tr><th>Data</th><th>Cat.</th><th>Descriere</th><th>Bon</th><th class="tr">RON</th></tr></thead><tbody>${pE.map(ex=>`<tr><td style="font-size:12px">${ex.date}</td><td style="font-size:12px">${ECATS[ex.cat]||ex.cat}</td><td style="font-size:12px">${ex.desc||'—'}</td><td style="font-size:11px;color:var(--tx2)">${ex.bon||'—'}</td><td class="tr" style="font-weight:600;color:var(--rd)">${ex.suma.toLocaleString('ro-RO')}</td></tr>`).join('')}<tr class="tr2"><td colspan="4">Total</td><td class="tr" style="color:var(--rd)"><strong>${totEx.toLocaleString('ro-RO')} RON</strong></td></tr></tbody></table></div></div>`:''}
+  `;
+}
 // STATS
-// ═══════════════════════════════════════
-function renderStats() {
-  const now = new Date();
-  const thisMonth = reservations.filter(r => { const d = new Date(r.checkin); return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); });
-  const totalRev  = reservations.reduce((s,r) => s + (r.pret||0), 0);
-  const totalAvans= reservations.reduce((s,r) => s + (r.avans||0), 0);
-  const totalRest = reservations.reduce((s,r) => s + (r.rest||0), 0);
-  const active    = reservations.filter(r => new Date(r.checkin) <= now && new Date(r.checkout) >= now).length;
-  const upcoming  = reservations.filter(r => new Date(r.checkin) > now).length;
-  const assetCnt  = {};
-  ALL_ASSETS.forEach(a => assetCnt[a] = 0);
-  reservations.forEach(r => assetCnt[r.asset] = (assetCnt[r.asset]||0)+1);
-  const maxCnt = Math.max(...Object.values(assetCnt), 1);
-
-  document.getElementById('statsContainer').innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="label">Total rezervări</div><div class="value">${reservations.length}</div><div class="sub">${thisMonth.length} luna aceasta</div></div>
-      <div class="stat-card"><div class="label">Active acum</div><div class="value" style="color:var(--accent2)">${active}</div><div class="sub">${upcoming} viitoare</div></div>
-      <div class="stat-card"><div class="label">Venituri totale</div><div class="value" style="font-size:20px">${totalRev.toLocaleString('ro-RO')} RON</div><div class="sub">Avans: ${totalAvans.toLocaleString('ro-RO')} RON</div></div>
-      <div class="stat-card"><div class="label">Rest de încasat</div><div class="value" style="color:var(--orange);font-size:20px">${totalRest.toLocaleString('ro-RO')} RON</div><div class="sub">de la ${reservations.filter(r=>r.rest>0).length} rezervări</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div class="asset-group">
-        <div class="asset-group-header">📊 Rezervări per asset</div>
-        ${ALL_ASSETS.map(a => {
-          const cnt = assetCnt[a]||0;
-          const colors = ASSET_COLORS[getType(a)];
-          return `<div style="padding:10px 14px;border-bottom:1px solid rgba(42,52,71,0.4);display:flex;align-items:center;gap:10px">
-            <span class="asset-dot ${colors.dotClass}"></span>
-            <span style="flex:1;font-size:13px">${a}</span>
-            <div style="width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden">
-              <div style="height:100%;width:${cnt/maxCnt*100}%;background:${colors.dotClass.replace('dot-','') === 'cabana'?'#4e9e6b':colors.dotClass.replace('dot-','') === 'ponton'?'#2e6b9e':colors.dotClass.replace('dot-','') === 'sauna'?'#c9622a':'#7a5cb8'};border-radius:3px"></div>
-            </div>
-            <span style="font-size:13px;font-weight:600;min-width:20px;text-align:right">${cnt}</span>
-          </div>`;
-        }).join('')}
-      </div>
-      <div class="asset-group">
-        <div class="asset-group-header">📅 Luna ${MONTHS_RO[now.getMonth()]}</div>
-        ${thisMonth.length === 0 ? '<div class="empty-state" style="padding:30px"><p>Nicio rezervare.</p></div>' :
-          thisMonth.sort((a,b) => new Date(a.checkin)-new Date(b.checkin)).map(r => {
-            const colors = ASSET_COLORS[getType(r.asset)];
-            return `<div style="padding:10px 14px;border-bottom:1px solid rgba(42,52,71,0.4);display:flex;align-items:center;gap:10px">
-              <span class="asset-dot ${colors.dotClass}"></span>
-              <div style="flex:1"><div style="font-size:13px;font-weight:500">${r.asset} — ${r.nume}</div>
-              <div style="font-size:11px;color:var(--text2)">${fmtDate(r.checkin)} → ${fmtDate(r.checkout)}</div></div>
-              <span style="font-size:13px;color:var(--accent2)">${r.pret?r.pret+' RON':'—'}</span>
-            </div>`;
-          }).join('')}
-      </div>
-    </div>
-  `;
+function rSt(){
+  const now=new Date();const tm=RS.filter(r=>{const d=new Date(r.checkin);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
+  const tot=RS.reduce((s,r)=>s+(r.pret||0),0),totR=RS.reduce((s,r)=>s+(r.rest||0),0);
+  const ac=RS.filter(r=>new Date(r.checkin)<=now&&new Date(r.checkout)>=now).length,up=RS.filter(r=>new Date(r.checkin)>now).length;
+  const bT={cabana:{c:0,r:0},ponton:{c:0,r:0},sauna:{c:0,r:0},pensiune:{c:0,r:0}};const bA={};ALL.forEach(a=>bA[a]={c:0,r:0});
+  RS.forEach(r=>{const t=r.type==='ponton-cabana'?'ponton':r.type;if(bT[t]){bT[t].c++;bT[t].r+=(r.pret||0);}if(bA[r.asset]){bA[r.asset].c++;bA[r.asset].r+=(r.pret||0);}});
+  const mxR=Math.max(...Object.values(bA).map(x=>x.r),1);
+  document.getElementById('stCnt').innerHTML=`<div class="sgrid"><div class="sc cg"><div class="sl">Total rezervări</div><div class="sv">${RS.length}</div><div class="ss">${tm.length} luna aceasta</div></div><div class="sc cb"><div class="sl">Active acum</div><div class="sv" style="color:var(--wt2)">${ac}</div><div class="ss">${up} viitoare</div></div><div class="sc cy"><div class="sl">Venituri totale</div><div class="sv" style="font-size:16px">${tot.toLocaleString('ro-RO')} RON</div></div><div class="sc cr"><div class="sl">Rest de încasat</div><div class="sv" style="color:var(--or);font-size:16px">${totR.toLocaleString('ro-RO')} RON</div></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:12px">${[['🏠 Cabănuțe','cabana','#4e9e6b'],['⛵ Pontoane','ponton','#2e6b9e'],['🔥 Wellness','sauna','#c9622a'],['🛏 Pensiune','pensiune','#7a5cb8']].map(([l,k,c])=>`<div class="rcd"><div class="rch"><div class="rct" style="font-size:13px">${l}</div></div><div class="rcb" style="display:flex;gap:16px;align-items:center"><div><div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:${c}">${bT[k].c}</div><div style="font-size:11px;color:var(--tx2)">rezervări</div></div><div><div style="font-size:16px;font-weight:700">${bT[k].r.toLocaleString('ro-RO')} RON</div><div style="font-size:11px;color:var(--tx2)">venituri</div></div></div></div>`).join('')}</div>
+  <div class="rcd"><div class="rch"><div class="rct">📊 Per asset</div></div><div class="rcb">${ALL.map(a=>{const t=gT2(a);const cl=COLS[t];return `<div class="arow"><span class="adot ${cl.d}" style="width:8px;height:8px;flex-shrink:0"></span><span style="flex:0 0 165px;font-size:12px">${a}</span><span style="flex:0 0 22px;font-size:11px;color:var(--tx2);text-align:center">${bA[a].c}×</span><div class="bw"><div class="bf" style="width:${bA[a].r/mxR*100}%;background:${BHEX[t]}"></div></div><span style="flex:0 0 90px;font-size:12px;font-weight:600;text-align:right">${bA[a].r?bA[a].r.toLocaleString('ro-RO')+' RON':'—'}</span></div>`;}).join('')}</div></div>`;
 }
-
-// ═══════════════════════════════════════
 // UTILS
-// ═══════════════════════════════════════
-function toLocalISO(d) {
-  const p = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
-}
-function fmtDate(dt) {
-  if (!dt) return '—';
-  return new Date(dt).toLocaleDateString('ro-RO', { day:'2-digit', month:'2-digit', year:'numeric' });
-}
-function fmtFull(dt) {
-  if (!dt) return '—';
-  const d = new Date(dt);
-  return d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});
-}
+function dStr(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
+function fD(dt){if(!dt)return'—';return new Date(dt).toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function fFull(dt){if(!dt)return'—';const d=new Date(dt);return d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});}
 
-function exportCSV() {
-  const h = ['ID','Asset','Tip','Nume','Telefon','Persoane','Check-in','Check-out','Zile','Total','Avans','Rest','Avans OK','Note','Creat'];
-  const rows = reservations.map(r => {
-    const days = Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);
-    return [r.id,r.asset,r.type,r.nume,r.tel||'',r.persoane||'',r.checkin,r.checkout,days,r.pret||0,r.avans||0,r.rest||0,r.avansOk?'Da':'Nu',r.note||'',r.createdAt];
-  });
-  const csv = [h,...rows].map(row => row.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'})),download:`rezervari_${new Date().toISOString().slice(0,10)}.csv`});
-  a.click();
-}
-
-function populateFilters() {
-  const sel = document.getElementById('filterAsset');
-  [
-    {label:'Cabănuțe', assets: ALL_ASSETS.slice(0,8)},
-    {label:'Pontoane', assets: ALL_ASSETS.slice(8,11)},
-    {label:'Wellness', assets: [ALL_ASSETS[11]]},
-    {label:'Pensiune', assets: ALL_ASSETS.slice(12)},
-  ].forEach(g => {
-    const og = document.createElement('optgroup'); og.label = g.label;
-    g.assets.forEach(a => { const o = document.createElement('option'); o.value = o.textContent = a; og.appendChild(o); });
+function populateFilters2(){
+  const sel=document.getElementById('fA2');
+  if(!sel||sel.options.length>1) return;
+  [{l:'Cabănuțe',a:ALL.slice(0,8)},{l:'Pontoane libere',a:ALL.slice(8,11)},{l:'Pontoane cabănuțe',a:ALL.slice(11,19)},{l:'Wellness',a:[ALL[19]]},{l:'Pensiune',a:ALL.slice(20)}].forEach(({l,a})=>{
+    const og=document.createElement('optgroup');og.label=l;
+    a.forEach(x=>{const o=document.createElement('option');o.value=o.textContent=x;og.appendChild(o);});
     sel.appendChild(og);
   });
 }
-
-// ═══════════════════════════════════════
-// AUTO-REFRESH
-// ═══════════════════════════════════════
-function startAutoRefresh() {
-  refreshTimer = setInterval(() => loadReservations(true), AUTO_REFRESH_MS);
+function rL2(){
+  const s=document.getElementById('srch2').value.toLowerCase(),fa=document.getElementById('fA2').value,fs=document.getElementById('fS2').value,fp=document.getElementById('fP2').value,now=new Date();
+  const fl=RS.filter(r=>{if(s&&!r.nume.toLowerCase().includes(s)&&!r.asset.toLowerCase().includes(s))return false;if(fa&&r.asset!==fa)return false;if(fp&&r.payStatus!==fp)return false;const ci=new Date(r.checkin),co=new Date(r.checkout);const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';if(fs&&st!==fs)return false;return true;}).sort((a,b)=>new Date(b.checkin)-new Date(a.checkin));
+  const el=document.getElementById('lCnt2');if(!fl.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px;margin-bottom:8px">📋</div><p>Nicio rezervare.</p></div>';return;}
+  const pB=r=>r.payStatus==='paid'?'<span class="bdg b-pd">🟢 Achitat</span>':r.payStatus==='avans'?'<span class="bdg b-av">🟡 Avans</span>':'<span class="bdg b-np">🔴 Neachitat</span>';
+  el.innerHTML=`<table class="rtbl"><thead><tr><th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th><th class="tc">Zile</th><th class="tr">Total</th><th class="tr">Rest</th><th class="tc">Plată</th><th class="tc">Status</th><th></th></tr></thead><tbody>${fl.map(r=>{const ci=new Date(r.checkin),co=new Date(r.checkout);const days=Math.round((co-ci)/86400000);const cl=COLS[gT2(r.asset)];const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';const stB=st==='active'?'<span class="bdg b-ac">● Activ</span>':st==='upcoming'?'<span class="bdg b-up">▸ Viitor</span>':'<span class="bdg b-dn">✓ Final</span>';const t=gT2(r.asset);const disc=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡ std:${r.pretStd}</div>`:'';return `<tr><td><span class="fx"><span class="adot ${cl.d}"></span><div>${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣 ${r.pescari}p</div>`:''}</div></span></td><td><div style="font-weight:500">${r.nume}</div>${r.tel?`<div style="font-size:11px;color:var(--tx2)">${r.tel}</div>`:''}${r.cnp?`<div style="font-size:10px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</td><td>${fFull(r.checkin)}</td><td>${fFull(r.checkout)}</td><td class="tc">${days}</td><td class="tr">${r.pret?r.pret.toLocaleString('ro-RO')+' RON':'—'}${disc}</td><td class="tr" style="color:${r.rest>0?'var(--or)':'var(--tx2)'}">${r.rest?r.rest.toLocaleString('ro-RO')+' RON':'0'}</td><td class="tc">${pB(r)}</td><td class="tc">${stB}</td><td><button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></td></tr>`;}).join('')}</tbody></table>`;
 }
-
-// ═══════════════════════════════════════
+function rTd2(){
+  const now=new Date();now.setHours(0,0,0,0);const tom=new Date(now);tom.setDate(tom.getDate()+1);
+  const mI=(r,d)=>{const x=new Date(r.checkin);x.setHours(0,0,0,0);return x.getTime()===d.getTime();};
+  const mO=(r,d)=>{const x=new Date(r.checkout);x.setHours(0,0,0,0);return x.getTime()===d.getTime();};
+  const ci=RS.filter(r=>mI(r,now)),co=RS.filter(r=>mO(r,now)),st=RS.filter(r=>{const a=new Date(r.checkin);a.setHours(0,0,0,0);const b=new Date(r.checkout);b.setHours(0,0,0,0);return a<now&&b>now;}),tm=RS.filter(r=>mI(r,tom));
+  const tdStr=now.toLocaleDateString('ro-RO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const card=(title,color,accent,list)=>list.length===0?'':
+    `<div class="tcd"><div class="tch" style="color:${color};border-left-color:${accent}">${title}</div>${list.map(r=>{const days=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const cl=COLS[gT2(r.asset)];const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);return `<div class="tit"><span class="adot ${cl.d}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span><div style="flex:1;min-width:150px"><div style="font-weight:600">${r.asset}</div><div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''} · 👥 ${r.persoane}</div>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:11px;color:var(--tx2)">🎣 ${r.pescari} pescari</div>`:''} ${r.cnp?`<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</div><div style="font-size:12px;color:var(--tx2)">${fFull(r.checkin)} → ${fFull(r.checkout)} (${days}z)</div><div style="font-size:12px">${pi} ${r.rest>0?`<span style="color:var(--or)">Rest: ${r.rest} RON</span>`:'<span style="color:var(--ac2)">Achitat</span>'}</div>${r.note?`<div style="font-size:12px;color:var(--tx2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></div>`;}).join('')}</div>`;
+  document.getElementById('tdCnt2').innerHTML=`<div class="thdr">🌅 ${tdStr.charAt(0).toUpperCase()+tdStr.slice(1)}</div><div class="sgrid" style="margin-bottom:14px"><div class="sc cg"><div class="sl">Check-in azi</div><div class="sv" style="color:var(--ac2)">${ci.length}</div><div class="ss">sosiri</div></div><div class="sc cr"><div class="sl">Check-out azi</div><div class="sv" style="color:#f08080">${co.length}</div><div class="ss">curățenie</div></div><div class="sc cb"><div class="sl">Ocupate azi</div><div class="sv" style="color:var(--wt2)">${st.length+ci.length}</div><div class="ss">assets</div></div><div class="sc cy"><div class="sl">Mâine</div><div class="sv" style="color:var(--gd2)">${tm.length}</div><div class="ss">de pregătit</div></div></div>${card('🚪 Check-out azi','#f08080','var(--rd)',co)}${card('✅ Check-in azi','var(--ac2)','var(--ac)',ci)}${card('🛏 Rămân azi','var(--wt2)','var(--wt)',st)}${card('📋 Check-in mâine','var(--gd2)','var(--gd)',tm)}${!ci.length&&!co.length&&!st.length?'<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px">😌</div><p style="margin-top:8px">Zi liniștită!</p></div>':''}`;
+}
+function sP2(p,btn){rPer2=p;document.querySelectorAll('#at-c-reports .pb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rRp2();}
+function rRp2(){
+  const{s,e}=getPR(rPer2);const pl=`${fD(s)} — ${fD(e)}`;
+  const iP=RS.filter(r=>{const ci=new Date(r.checkin);ci.setHours(0,0,0,0);const co=new Date(r.checkout);co.setHours(0,0,0,0);return ci<=e&&co>=s;});
+  const pE=EX.filter(ex=>{const d=new Date(ex.date);d.setHours(0,0,0,0);return d>=s&&d<=e;});
+  const bT={cabana:0,ponton:0,sauna:0,pensiune:0};const bA={};ALL.forEach(a=>bA[a]={c:0,r:0});
+  iP.forEach(r=>{const t=r.type==='ponton-cabana'?'ponton':r.type;bT[t]=(bT[t]||0)+(r.pret||0);if(bA[r.asset]){bA[r.asset].c++;bA[r.asset].r+=(r.pret||0);}});
+  const tot=iP.reduce((s,r)=>s+(r.pret||0),0),totAv=iP.reduce((s,r)=>s+(r.avans||0),0),totRst=iP.reduce((s,r)=>s+(r.rest||0),0),totEx=pE.reduce((s,ex)=>s+ex.suma,0);
+  const o60=Math.round(tot*0.6),a40=Math.round(tot*0.4),netO=Math.max(0,o60-totEx);
+  const disc=iP.filter(r=>r.pretStd&&r.pret!==r.pretStd),totDisc=disc.reduce((s,r)=>s+(r.pretStd-r.pret),0);
+  const mxA=Math.max(...Object.values(bA).map(x=>x.r),1);
+  const tRows=[['🏠 Cabănuțe','cabana'],['⛵ Pontoane','ponton'],['🔥 Saună & Ciubăr','sauna'],['🛏 Pensiune','pensiune']];
+  document.getElementById('rpCnt2').innerHTML=`
+  <div class="rcd"><div class="rch"><div class="rct">📊 Venituri — ${pl}</div><span style="font-size:12px;color:var(--tx2)">${iP.length} rez.</span></div><div class="rcb"><div class="sgrid">
+    <div class="sc cg"><div class="sl">CA Brută</div><div class="sv" style="font-size:18px">${tot.toLocaleString('ro-RO')} RON</div></div>
+    <div class="sc cy"><div class="sl">Avans încasat</div><div class="sv" style="font-size:18px;color:var(--gd2)">${totAv.toLocaleString('ro-RO')} RON</div></div>
+    <div class="sc cr"><div class="sl">Rest de încasat</div><div class="sv" style="font-size:18px;color:var(--or)">${totRst.toLocaleString('ro-RO')} RON</div></div>
+    <div class="sc cp"><div class="sl">Cheltuieli</div><div class="sv" style="font-size:18px;color:#b09ad4">${totEx.toLocaleString('ro-RO')} RON</div></div>
+  </div></div></div>
+  <div class="rcd"><div class="rch"><div class="rct">🧾 Decont 60/40 — ${pl}</div></div><div class="rcb" style="padding:0">
+    <table class="dt"><thead><tr><th>Categorie</th><th class="tr">CA</th><th class="tr" style="color:var(--wt2)">60% Proprietar</th><th class="tr" style="color:var(--ac2)">40% Administrator</th></tr></thead><tbody>
+    ${tRows.map(([l,k])=>`<tr><td>${l}</td><td class="tr">${(bT[k]||0).toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--wt2)">${Math.round((bT[k]||0)*.6).toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--ac2)">${Math.round((bT[k]||0)*.4).toLocaleString('ro-RO')} RON</td></tr>`).join('')}
+    <tr class="tr2"><td><strong>TOTAL CA brută</strong></td><td class="tr"><strong>${tot.toLocaleString('ro-RO')} RON</strong></td><td class="tr" style="color:var(--wt2)"><strong>${o60.toLocaleString('ro-RO')} RON</strong></td><td class="tr" style="color:var(--ac2)"><strong>${a40.toLocaleString('ro-RO')} RON</strong></td></tr>
+    ${totEx>0?`<tr style="background:rgba(122,92,184,.06)"><td style="font-size:12px;color:var(--tx2)">💸 Cheltuieli (suportate proprietar)</td><td class="tr" style="color:var(--rd);font-size:12px">-${totEx.toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--rd);font-size:12px">-${totEx.toLocaleString('ro-RO')} RON</td><td class="tr" style="color:var(--tx2);font-size:12px">0</td></tr>
+    <tr class="tr2"><td><strong>NET de plătit proprietar</strong></td><td></td><td class="tr" style="color:var(--wt2)"><strong>${netO.toLocaleString('ro-RO')} RON</strong></td><td class="tr" style="color:var(--ac2)"><strong>${a40.toLocaleString('ro-RO')} RON</strong></td></tr>`:''}
+    </tbody></table>
+  </div></div>
+  ${totEx>0?`<div class="rcd"><div class="rch"><div class="rct">💸 Cheltuieli — ${pl}</div><span style="color:var(--rd);font-size:12px">${totEx.toLocaleString('ro-RO')} RON</span></div><div class="rcb" style="padding:0"><table class="dt"><thead><tr><th>Data</th><th>Cat.</th><th>Descriere</th><th>Bon</th><th class="tr">RON</th></tr></thead><tbody>${pE.map(ex=>`<tr><td style="font-size:12px">${ex.date}</td><td style="font-size:12px">${ECATS[ex.cat]||ex.cat}</td><td style="font-size:12px">${ex.desc||'—'}</td><td style="font-size:11px;color:var(--tx2)">${ex.bon||'—'}</td><td class="tr" style="color:var(--rd);font-weight:600">${ex.suma.toLocaleString('ro-RO')}</td></tr>`).join('')}<tr class="tr2"><td colspan="4">Total</td><td class="tr" style="color:var(--rd)"><strong>${totEx.toLocaleString('ro-RO')} RON</strong></td></tr></tbody></table></div></div>`:''}
+  <div class="rcd"><div class="rch"><div class="rct">📈 Per asset — ${pl}</div></div><div class="rcb">${iP.length===0?'<p style="color:var(--tx2);text-align:center;padding:14px">Nicio rezervare.</p>':ALL.filter(a=>bA[a]&&bA[a].c>0).sort((a,b)=>bA[b].r-bA[a].r).map(a=>{const t=gT2(a);const cl=COLS[t];return `<div class="arow"><span class="adot ${cl.d}" style="width:8px;height:8px;flex-shrink:0"></span><span style="flex:0 0 155px;font-size:12px">${a}</span><span style="flex:0 0 22px;font-size:11px;color:var(--tx2);text-align:center">${bA[a].c}×</span><div class="bw"><div class="bf" style="width:${bA[a].r/mxA*100}%;background:${BHEX[t]}"></div></div><span style="flex:0 0 90px;font-size:12px;font-weight:600;text-align:right">${bA[a].r.toLocaleString('ro-RO')} RON</span></div>`;}).join('')}</div></div>
+  <div class="rcd"><div class="rch"><div class="rct">👥 Oaspeți — ${pl}</div></div><div class="rcb" style="padding:0">${iP.length===0?'<p style="color:var(--tx2);text-align:center;padding:14px">Nicio rezervare.</p>':`<table class="dt"><thead><tr><th>Asset</th><th>Nume</th><th>Telefon</th><th>CNP</th><th>Act</th><th>Check-in</th><th>Check-out</th><th class="tr">RON</th><th>Plată</th></tr></thead><tbody>${iP.sort((a,b)=>new Date(a.checkin)-new Date(b.checkin)).map(r=>{const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);const d2=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡std:${r.pretStd}</div>`:'';return `<tr><td style="font-size:12px">${r.asset}</td><td style="font-weight:500">${r.nume}</td><td style="font-size:12px">${r.tel||'—'}</td><td style="font-size:11px;color:var(--tx2)">${r.cnp||'—'}</td><td style="font-size:11px;color:var(--tx2)">${r.actSerie||'—'}</td><td style="font-size:12px">${fD(r.checkin)}</td><td style="font-size:12px">${fD(r.checkout)}</td><td class="tr" style="font-weight:600">${r.pret?r.pret.toLocaleString('ro-RO'):'-'}${d2}</td><td>${pi}${r.rest>0?` <span style="font-size:10px;color:var(--or)">${r.rest}rest</span>`:''}</td></tr>`;}).join('')}<tr class="tr2"><td colspan="7"><strong>TOTAL</strong></td><td class="tr"><strong>${tot.toLocaleString('ro-RO')} RON</strong></td><td></td></tr></tbody></table>`}</div></div>
+  ${totDisc>0?`<div class="rcd"><div class="rch"><div class="rct">⚡ Discounturi — ${pl}</div><span style="color:var(--or);font-size:12px">${totDisc.toLocaleString('ro-RO')} RON</span></div><div class="rcb" style="padding:0"><table class="dt"><thead><tr><th>Asset</th><th>Client</th><th>Preț aplicat</th><th>Standard</th><th>Discount</th></tr></thead><tbody>${disc.map(r=>`<tr><td style="font-size:12px">${r.asset}</td><td>${r.nume}</td><td style="color:var(--ac2);font-weight:600">${r.pret.toLocaleString('ro-RO')} RON</td><td style="color:var(--tx2)">${r.pretStd.toLocaleString('ro-RO')} RON</td><td style="color:var(--or);font-weight:600">${(r.pretStd-r.pret).toLocaleString('ro-RO')} RON</td></tr>`).join('')}</tbody></table></div></div>`:''}
+  `;
+}
+function rSt2(){
+  const now=new Date();const tm=RS.filter(r=>{const d=new Date(r.checkin);return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
+  const tot=RS.reduce((s,r)=>s+(r.pret||0),0),totR=RS.reduce((s,r)=>s+(r.rest||0),0);
+  const ac=RS.filter(r=>new Date(r.checkin)<=now&&new Date(r.checkout)>=now).length,up=RS.filter(r=>new Date(r.checkin)>now).length;
+  const bT={cabana:{c:0,r:0},ponton:{c:0,r:0},sauna:{c:0,r:0},pensiune:{c:0,r:0}};const bA={};ALL.forEach(a=>bA[a]={c:0,r:0});
+  RS.forEach(r=>{const t=r.type==='ponton-cabana'?'ponton':r.type;if(bT[t]){bT[t].c++;bT[t].r+=(r.pret||0);}if(bA[r.asset]){bA[r.asset].c++;bA[r.asset].r+=(r.pret||0);}});
+  const mxR=Math.max(...Object.values(bA).map(x=>x.r),1);
+  document.getElementById('stCnt2').innerHTML=`<div class="sgrid"><div class="sc cg"><div class="sl">Total rezervări</div><div class="sv">${RS.length}</div><div class="ss">${tm.length} luna aceasta</div></div><div class="sc cb"><div class="sl">Active acum</div><div class="sv" style="color:var(--wt2)">${ac}</div><div class="ss">${up} viitoare</div></div><div class="sc cy"><div class="sl">Venituri totale</div><div class="sv" style="font-size:16px">${tot.toLocaleString('ro-RO')} RON</div></div><div class="sc cr"><div class="sl">Rest de încasat</div><div class="sv" style="color:var(--or);font-size:16px">${totR.toLocaleString('ro-RO')} RON</div></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:12px">${[['🏠 Cabănuțe','cabana','#4e9e6b'],['⛵ Pontoane','ponton','#2e6b9e'],['🔥 Wellness','sauna','#c9622a'],['🛏 Pensiune','pensiune','#7a5cb8']].map(([l,k,c])=>`<div class="rcd"><div class="rch"><div class="rct" style="font-size:13px">${l}</div></div><div class="rcb" style="display:flex;gap:16px;align-items:center"><div><div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:${c}">${bT[k].c}</div><div style="font-size:11px;color:var(--tx2)">rezervări</div></div><div><div style="font-size:15px;font-weight:700">${bT[k].r.toLocaleString('ro-RO')} RON</div></div></div></div>`).join('')}</div>
+  <div class="rcd"><div class="rch"><div class="rct">📊 Per asset (toate timpurile)</div></div><div class="rcb">${ALL.map(a=>{const t=gT2(a);const cl=COLS[t];return `<div class="arow"><span class="adot ${cl.d}" style="width:8px;height:8px;flex-shrink:0"></span><span style="flex:0 0 155px;font-size:12px">${a}</span><span style="flex:0 0 22px;font-size:11px;color:var(--tx2);text-align:center">${bA[a].c}×</span><div class="bw"><div class="bf" style="width:${bA[a].r/mxR*100}%;background:${BHEX[t]}"></div></div><span style="flex:0 0 90px;font-size:12px;font-weight:600;text-align:right">${bA[a].r?bA[a].r.toLocaleString('ro-RO')+' RON':'—'}</span></div>`;}).join('')}</div></div>`;
+}
+function exportCSV(){const h=['ID','Asset','Tip','Nume','Tel','Persoane','Check-in','Check-out','Zile','Total RON','Pret Standard','Avans','Rest','Status Plata','Data Plata','Pescari','CNP','Act','Autoritate','Note'];const rows=RS.map(r=>{const d=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);return[r.id,r.asset,r.type,r.nume,r.tel||'',r.persoane||'',r.checkin,r.checkout,d,r.pret||0,r.pretStd||r.pret||0,r.avans||0,r.rest||0,r.payStatus||'',r.dataPlata||'',r.pescari||0,r.cnp||'',r.actSerie||'',r.actAut||'',r.note||''];});const csv=[h,...rows].map(row=>row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'})),download:`rezervari_${new Date().toISOString().slice(0,10)}.csv`});a.click();}
+function populateFilters(){const sel=document.getElementById('fA');[{l:'Cabănuțe',a:ALL.slice(0,8)},{l:'Pontoane libere',a:ALL.slice(8,11)},{l:'Pontoane cabănuțe',a:ALL.slice(11,19)},{l:'Wellness',a:[ALL[19]]},{l:'Pensiune',a:ALL.slice(20)}].forEach(({l,a})=>{const og=document.createElement('optgroup');og.label=l;a.forEach(x=>{const o=document.createElement('option');o.value=o.textContent=x;og.appendChild(o);});sel.appendChild(og);});}
 // INIT
-// ═══════════════════════════════════════
-populateFilters();
-initCalendar();
-loadReservations().then(() => startAutoRefresh());
+(async()=>{
+  document.getElementById('snb').classList.add('on');
+  await ldAll();
+  populateFilters();
+  initCal();
+  rCal();
+  document.getElementById('ed').value=dStr(new Date());
+})();
+
+// Auto-refresh every 30 seconds
+setInterval(async()=>{
+  try{
+    const data=await apiGet();
+    if(data.ok){
+      RS=data.rezervari.map(r=>({...r,pret:parseFloat(r.pret)||0,avans:parseFloat(r.avans)||0,rest:parseFloat(r.rest)||0,pretStd:parseFloat(r.pretStd)||0,pescari:parseInt(r.pescari)||0,persoane:parseInt(r.persoane)||1}));
+      EX=(data.cheltuieli||[]).map(e=>({...e,suma:parseFloat(e.suma)||0}));
+      localStorage.setItem(SK,JSON.stringify(RS));
+      localStorage.setItem(EK,JSON.stringify(EX));
+      rfAll();
+    }
+  }catch(e){}
+},30000);
 </script>
 </body>
 </html>
