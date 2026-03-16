@@ -364,6 +364,9 @@ textarea{resize:vertical;min-height:55px}
 <div class="mov" id="mOv">
   <div class="mdl">
     <div class="mhdr"><h2 id="mTtl">Rezervare nouă</h2><button class="mcls" onclick="clsM()">✕</button></div>
+    <div id="publicNote" style="display:none;background:rgba(78,158,107,.08);border-bottom:1px solid rgba(78,158,107,.2);padding:9px 18px;font-size:12px;color:var(--ac2)">
+      ℹ️ Completează datele pentru rezervare. Administratorul va confirma disponibilitatea.
+    </div>
     <div class="mbdy">
       <div class="stl">Asset &amp; Client</div>
       <div class="fr"><div class="fg full">
@@ -378,22 +381,40 @@ textarea{resize:vertical;min-height:55px}
         </div>
         <div id="pescNote" style="font-size:11px;color:var(--tx2);margin-top:-5px;margin-bottom:7px"></div>
       </div>
+      <!-- Ponton cabana - doar cand e dat separat -->
+      <div id="pontonCheck" style="display:none;margin-bottom:10px">
+        <label class="fc" style="cursor:pointer" onclick="onPontonMode()">
+          <input type="checkbox" id="fPontonDoar" style="width:16px;height:16px;accent-color:var(--ac);flex-shrink:0">
+          <div>
+            <div style="font-size:13px;font-weight:600">🎣 Doar ponton — cabănuța e liberă</div>
+            <div style="font-size:11px;color:var(--tx2)">Bifează dacă închiriezi doar pontonul. Apare ca Ponton în raport.</div>
+          </div>
+        </label>
+        <div id="pontonPescariRow" style="display:none;margin-top:8px">
+          <div class="fr" style="margin-bottom:0">
+            <div class="fg"><label>Nr. pescari</label><input type="number" id="fPescPonton" min="1" max="8" value="1" oninput="cP()"></div>
+            <div class="fg"><label>Însoțitori (gratuit)</label><input type="number" id="fInsPonton" min="0" max="6" value="0"></div>
+          </div>
+        </div>
+      </div>
       <div class="fr"><div class="fg full"><label>Nume client *</label><input type="text" id="fNm" placeholder="Ion Popescu"></div></div>
       <div class="fr">
         <div class="fg"><label>Telefon</label><input type="text" id="fTl" placeholder="+40..."></div>
         <div class="fg"><label>Nr. persoane</label><input type="number" id="fPs" min="1" value="2"></div>
       </div>
-      <div class="stl" style="margin-top:12px">Date identitate</div>
-      <div class="fr">
-        <div class="fg"><label>CNP</label><input type="text" id="fCNP" placeholder="1234567890123" maxlength="13"></div>
-        <div class="fg"><label>Serie &amp; Nr. act</label><input type="text" id="fAct" placeholder="AB 123456"></div>
+      <div id="idSection" style="margin-top:2px">
+        <div class="stl" style="margin-top:12px">Date identitate</div>
+        <div class="fr">
+          <div class="fg"><label>CNP</label><input type="text" id="fCNP" placeholder="1234567890123" maxlength="13"></div>
+          <div class="fg"><label>Serie &amp; Nr. act</label><input type="text" id="fAct" placeholder="AB 123456"></div>
+        </div>
+        <div class="fr"><div class="fg full"><label>Autoritate emitentă</label><input type="text" id="fAut" placeholder="SPCLEP Cluj-Napoca"></div></div>
       </div>
-      <div class="fr"><div class="fg full"><label>Autoritate emitentă</label><input type="text" id="fAut" placeholder="SPCLEP Cluj-Napoca"></div></div>
       <div class="stl" style="margin-top:12px">Perioada</div>
       <div id="nDR">
         <div class="fr">
-          <div class="fg"><label>Check-in <span style="color:var(--tx3);font-size:10px">(14:00)</span></label><input type="date" id="fCI" onchange="cP()"></div>
-          <div class="fg"><label>Check-out <span style="color:var(--tx3);font-size:10px">(11:00)</span></label><input type="date" id="fCO" onchange="cP()"></div>
+          <div class="fg"><label>Check-in</label><input type="datetime-local" id="fCI" onchange="cP()"></div>
+          <div class="fg"><label>Check-out</label><input type="datetime-local" id="fCO" onchange="cP()"></div>
         </div>
       </div>
       <div id="sDR" style="display:none">
@@ -462,11 +483,10 @@ let eId=null,cY,cM,cTab='calendar',rPer='week',rPer2='week',dPer='week',pSt='non
 const ALL=[
   'Cabănuța 1','Cabănuța 2','Cabănuța 3','Cabănuța 4','Cabănuța 5','Cabănuța 6','Cabănuța 7','Cabănuța 8',
   'Ponton 1','Ponton 2','Ponton 3',
-  'Ponton Cabănuța 1','Ponton Cabănuța 2','Ponton Cabănuța 3','Ponton Cabănuța 4',
-  'Ponton Cabănuța 5','Ponton Cabănuța 6','Ponton Cabănuța 7','Ponton Cabănuța 8',
   'Saună & Ciubăr','Camera 1','Camera 2','Camera 3','Camera 4','Camera 5','Camera 6'
 ];
-function gT2(a){if(a.startsWith('Cabănuța'))return'cabana';if(a.startsWith('Ponton Cabănuța'))return'ponton-cabana';if(a.startsWith('Ponton'))return'ponton';if(a.startsWith('Saună'))return'sauna';return'pensiune';}
+function dtStr(d){const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;}
+function gT2(a){if(a.startsWith('Cabănuța'))return'cabana';if(a.startsWith('Ponton'))return'ponton';if(a.startsWith('Saună'))return'sauna';return'pensiune';}
 // ── SYNC BAR ──
 function setSyncing(on){document.getElementById('snb').classList.toggle('on',on);}
 
@@ -668,7 +688,7 @@ function makeAssetSelect(val, idx){
   wrap.id='assetRow_'+idx;
   const sel = document.createElement('select');
   sel.style.cssText='flex:1;background:var(--sf2);border:1px solid var(--bd);color:var(--tx);padding:8px 10px;border-radius:7px;font-family:"DM Sans",sans-serif;font-size:14px;outline:none';
-  sel.innerHTML='<optgroup label="🏠 Cabănuțe (ponton inclus)"><option>Cabănuța 1</option><option>Cabănuța 2</option><option>Cabănuța 3</option><option>Cabănuța 4</option><option>Cabănuța 5</option><option>Cabănuța 6</option><option>Cabănuța 7</option><option>Cabănuța 8</option></optgroup><optgroup label="⛵ Pontoane libere"><option>Ponton 1</option><option>Ponton 2</option><option>Ponton 3</option></optgroup><optgroup label="🎣 Ponton cabănuță"><option>Ponton Cabănuța 1</option><option>Ponton Cabănuța 2</option><option>Ponton Cabănuța 3</option><option>Ponton Cabănuța 4</option><option>Ponton Cabănuța 5</option><option>Ponton Cabănuța 6</option><option>Ponton Cabănuța 7</option><option>Ponton Cabănuța 8</option></optgroup><optgroup label="🔥 Wellness"><option>Saună &amp; Ciubăr</option></optgroup><optgroup label="🛏 Pensiune"><option>Camera 1</option><option>Camera 2</option><option>Camera 3</option><option>Camera 4</option><option>Camera 5</option><option>Camera 6</option></optgroup>';
+  sel.innerHTML='<optgroup label="🏠 Cabănuțe"><option>Cabănuța 1</option><option>Cabănuța 2</option><option>Cabănuța 3</option><option>Cabănuța 4</option><option>Cabănuța 5</option><option>Cabănuța 6</option><option>Cabănuța 7</option><option>Cabănuța 8</option></optgroup><optgroup label="⛵ Pontoane libere"><option>Ponton 1</option><option>Ponton 2</option><option>Ponton 3</option></optgroup><optgroup label="🔥 Wellness"><option>Saună &amp; Ciubăr</option></optgroup><optgroup label="🛏 Pensiune"><option>Camera 1</option><option>Camera 2</option><option>Camera 3</option><option>Camera 4</option><option>Camera 5</option><option>Camera 6</option></optgroup>';
   sel.onchange=()=>onAC();
   if(val) sel.value=val;
   wrap.appendChild(sel);
@@ -701,7 +721,26 @@ function initAssets(vals){
   arr.forEach((v,i)=>list.appendChild(makeAssetSelect(v,i)));
 }
 
+
+function onPontonMode(){
+  setTimeout(()=>{
+    const doar = document.getElementById('fPontonDoar')?.checked;
+    document.getElementById('pontonPescariRow').style.display = doar ? 'block' : 'none';
+    cP();
+  },10);
+}
+function getPontonMode(){
+  if(!document.getElementById('pontonCheck')||document.getElementById('pontonCheck').style.display==='none') return 'none';
+  return document.getElementById('fPontonDoar')?.checked ? 'doar' : 'none';
+}
+
 function openModal(id=null,preA=null,preD=null){
+  // Show/hide admin-only UI
+  const idSec=document.getElementById('idSection');
+  const pubNote=document.getElementById('publicNote');
+  const btnDel=document.getElementById('bDel');
+  if(idSec) idSec.style.display=adm?'block':'none';
+  if(pubNote) pubNote.style.display=adm?'none':'block';
   eId=id;aP=0;
   document.getElementById('mTtl').textContent=id?'Editează rezervarea':'Rezervare nouă';
   document.getElementById('bDel').style.display=id?'flex':'none';
@@ -709,7 +748,13 @@ function openModal(id=null,preA=null,preD=null){
   if(id){
     const r=RS.find(x=>x.id===id);if(!r)return;
     initAssets([r.asset]);document.getElementById('fNm').value=r.nume;document.getElementById('fTl').value=r.tel||'';document.getElementById('fPs').value=r.persoane||2;
-    document.getElementById('fCI').value=r.checkin?r.checkin.slice(0,10):'';document.getElementById('fCO').value=r.checkout?r.checkout.slice(0,10):'';
+    document.getElementById('fCI').value=r.checkin?r.checkin.slice(0,16):'';document.getElementById('fCO').value=r.checkout?r.checkout.slice(0,16):'';
+  const pm=r.pontonMode||'none';
+  if(document.getElementById('fPontonDoar')){
+    document.getElementById('fPontonDoar').checked = pm==='doar';
+    document.getElementById('pontonPescariRow').style.display = pm==='doar'?'block':'none';
+    if(pm==='doar') document.getElementById('fPescPonton').value=r.pescariPonton||1;
+  }
     document.getElementById('fSD').value=r.checkin?r.checkin.slice(0,10):'';document.getElementById('fSO').value=r.checkin?r.checkin.slice(11,16):'14:00';
     document.getElementById('fPesc').value=r.pescari||1;document.getElementById('fPr').value=r.pret||'';document.getElementById('fAv').value=r.avans||'';document.getElementById('fRst').value=r.rest||'';document.getElementById('fDP').value=r.dataPlata||'';
     document.getElementById('fCNP').value=r.cnp||'';document.getElementById('fAct').value=r.actSerie||'';document.getElementById('fAut').value=r.actAut||'';document.getElementById('fNt').value=r.note||'';
@@ -718,8 +763,13 @@ function openModal(id=null,preA=null,preD=null){
   } else {
     initAssets(preA?[preA]:['Cabănuța 1']);document.getElementById('fNm').value='';document.getElementById('fTl').value='';document.getElementById('fPs').value=2;
     const b=preD?new Date(preD):new Date();
-    document.getElementById('fCI').value=dStr(b);const out=new Date(b);out.setDate(out.getDate()+1);document.getElementById('fCO').value=dStr(out);
-    document.getElementById('fSD').value=dStr(b);document.getElementById('fSO').value='14:00';document.getElementById('fPesc').value=1;
+    b.setHours(14,0,0,0);
+    document.getElementById('fCI').value=dtStr(b);
+    const out=new Date(b);out.setDate(out.getDate()+1);out.setHours(11,0,0,0);
+    document.getElementById('fCO').value=dtStr(out);
+    document.getElementById('fSD').value=dStr(b);document.getElementById('fSO').value='14:00';
+    if(document.getElementById('fPontonDoar')) document.getElementById('fPontonDoar').checked=false;
+    if(document.getElementById('pontonPescariRow')) document.getElementById('pontonPescariRow').style.display='none';document.getElementById('fPesc').value=1;
     document.getElementById('fPr').value='';document.getElementById('fAv').value='';document.getElementById('fRst').value='';document.getElementById('fDP').value='';
     document.getElementById('fCNP').value='';document.getElementById('fAct').value='';document.getElementById('fAut').value='';document.getElementById('fNt').value='';document.getElementById('dInfo').textContent='';
     sPay('none',false);onAC();cP();
@@ -732,10 +782,15 @@ document.getElementById('mOv').addEventListener('click',e=>{if(e.target===e.curr
 function onAC(){
   const assets=getSelectedAssets();
   const a=assets[0]||'Cabănuța 1';
-  const t=gT2(a),iS=t==='sauna',iP=t==='ponton'||t==='ponton-cabana';
-  document.getElementById('nDR').style.display=iS?'none':'block';document.getElementById('sDR').style.display=iS?'block':'none';
+  const t=gT2(a),iS=t==='sauna',iP=t==='ponton';
+  const iC=t==='cabana';
+  document.getElementById('nDR').style.display=iS?'none':'block';
+  document.getElementById('sDR').style.display=iS?'block':'none';
   document.getElementById('pescSec').style.display=iP?'block':'none';
-  if(iP)document.getElementById('pescNote').textContent=t==='ponton-cabana'?'Ponton cabănuță — disponibil când cabana e liberă · 80 RON/pescar/zi':'Ponton liber · 80 RON/pescar/zi · 1 însoțitor gratuit';
+  document.getElementById('pontonCheck').style.display=iC?'block':'none';
+  if(iP) document.getElementById('pescNote').textContent='Ponton liber · 80 RON/pescar/zi · 1 însoțitor gratuit';
+  // Reset ponton mode when switching assets
+  if(!iC){ if(document.getElementById('fPontonInclus')) document.getElementById('fPontonInclus').checked=false; if(document.getElementById('fPontonDoar')) document.getElementById('fPontonDoar').checked=false; if(document.getElementById('pontonPescariRow')) document.getElementById('pontonPescariRow').style.display='none'; }
   cP();
 }
 function sPay(s,upd=true){
@@ -758,11 +813,14 @@ function calcAP(asset,ci,co,pesc){
 }
 function cP(){
   const assets=getSelectedAssets();const a=assets[0]||'Cabănuța 1';const t=gT2(a),iS=t==='sauna',iP=t==='ponton'||t==='ponton-cabana';
-  let ci,co;if(iS){ci=document.getElementById('fSD').value;co=ci;}else{ci=document.getElementById('fCI').value;co=document.getElementById('fCO').value;}
+  let ci,co;if(iS){ci=document.getElementById('fSD').value;co=ci;}else{ci=document.getElementById('fCI').value.slice(0,10);co=document.getElementById('fCO').value.slice(0,10);}
   const pesc=iP?parseInt(document.getElementById('fPesc').value)||1:0;
   if(!iS&&ci&&co){const d=Math.round((new Date(co)-new Date(ci))/86400000);document.getElementById('dInfo').textContent=d>0?`📅 ${d} zi${d>1?'le':''} · Check-in 14:00 · Check-out 11:00`:'⚠️ Check-out după check-in!';}
   else if(iS&&ci){document.getElementById('dInfo').textContent=`🔥 Sesiune · ${ci} ora ${document.getElementById('fSO').value}`;}
-  const{p,b}=calcAP(a,ci,co,pesc);aP=p;
+  const pm=getPontonMode();
+  let calcAsset=a, calcPesc=pesc;
+  if(pm==='doar'){ calcAsset='Ponton 1'; calcPesc=parseInt(document.getElementById('fPescPonton').value)||1; }
+  const{p,b}=calcAP(calcAsset,ci,co,calcPesc);aP=p;
   const prev=document.getElementById('pPrev');
   if(p>0){prev.style.display='block';document.getElementById('pAmt').textContent=p.toLocaleString('ro-RO')+' RON';document.getElementById('pBrk').innerHTML=b.replace(/\n/g,'<br>');if(!document.getElementById('fPr').value)document.getElementById('fPr').value=p;}
   else prev.style.display='none';
@@ -779,14 +837,17 @@ function svR(){
   const assets=getSelectedAssets();
   const a=assets[0]||'Cabănuța 1';
   const nm=document.getElementById('fNm').value.trim(),t=gT2(a),iS=t==='sauna';
-  let ci,co;if(iS){ci=document.getElementById('fSD').value;co=ci;}else{ci=document.getElementById('fCI').value;co=document.getElementById('fCO').value;}
+  let ci,co;if(iS){ci=document.getElementById('fSD').value;co=ci;}else{ci=document.getElementById('fCI').value.slice(0,10);co=document.getElementById('fCO').value.slice(0,10);}
   if(!a||!nm||!ci){toast('⚠ Completează câmpurile obligatorii','err');return;}
+  if(eId&&!adm){toast('🔐 Doar administratorul poate modifica rezervările existente.','err');return;}
   if(!iS&&new Date(co)<=new Date(ci)){toast('⚠ Check-out după check-in!','err');return;}
   const ora=iS?document.getElementById('fSO').value:'';
   const checkin=iS?`${ci}T${ora||'14:00'}`:`${ci}T14:00`;
   const checkout=iS?`${ci}T18:00`:`${co}T11:00`;
   const pr=parseFloat(document.getElementById('fPr').value)||0,av=parseFloat(document.getElementById('fAv').value)||0;
-  const r={id:eId||gId(),asset:a,type:t,nume:nm,tel:document.getElementById('fTl').value.trim(),persoane:parseInt(document.getElementById('fPs').value)||1,checkin,checkout,pret:pr,avans:av,rest:Math.max(0,pr-av),payStatus:pSt,dataPlata:document.getElementById('fDP').value||'',pretStd:aP||pr,pescari:parseInt(document.getElementById('fPesc').value)||0,cnp:document.getElementById('fCNP').value.trim(),actSerie:document.getElementById('fAct').value.trim(),actAut:document.getElementById('fAut').value.trim(),note:document.getElementById('fNt').value.trim(),createdAt:eId?(RS.find(x=>x.id===eId)?.createdAt||new Date().toISOString()):new Date().toISOString()};
+  const pm2=getPontonMode();
+  const reportType = (t==='cabana'&&pm2==='doar') ? 'ponton' : t;
+  const r={id:eId||gId(),asset:a,type:reportType,reportAsset:pm2==='doar'?('Ponton '+a):a,nume:nm,tel:document.getElementById('fTl').value.trim(),persoane:parseInt(document.getElementById('fPs').value)||1,checkin,checkout,pret:pr,avans:av,rest:Math.max(0,pr-av),payStatus:pSt,dataPlata:document.getElementById('fDP').value||'',pretStd:aP||pr,pescari:t==='ponton'?parseInt(document.getElementById('fPesc').value)||0:0,pescariPonton:pm2==='doar'?parseInt(document.getElementById('fPescPonton').value)||1:0,pontonMode:pm2,cnp:document.getElementById('fCNP').value.trim(),actSerie:document.getElementById('fAct').value.trim(),actAut:document.getElementById('fAut').value.trim(),note:document.getElementById('fNt').value.trim(),createdAt:eId?(RS.find(x=>x.id===eId)?.createdAt||new Date().toISOString()):new Date().toISOString()};
   if(eId){
     const i=RS.findIndex(x=>x.id===eId);RS[i]=r;
     svD();
@@ -821,7 +882,7 @@ function rCal(){
   const dr=document.createElement('div');dr.className='cal-drow';
   for(let d=1;d<=dim;d++){const dt=new Date(cY,cM,d);const dow=(dt.getDay()+6)%7;const dh=document.createElement('div');dh.className='cal-dh'+(dt.getTime()===tod.getTime()?' tc':'')+(dow>=5?' we':'');dh.innerHTML=`<div style="font-weight:700">${d}</div><div style="font-size:9px">${DAYS[dow]}</div>`;dr.appendChild(dh);}
   hr.appendChild(dr);g.appendChild(hr);
-  const groups=[{l:'🏠 Cabănuțe (ponton inclus)',a:ALL.slice(0,8)},{l:'⛵ Pontoane libere',a:ALL.slice(8,11)},{l:'🎣 Pontoane cabănuțe',a:ALL.slice(11,19)},{l:'🔥 Wellness',a:[ALL[19]]},{l:'🛏 Pensiune',a:ALL.slice(20)}];
+  const groups=[{l:'🏠 Cabănuțe',a:ALL.slice(0,8)},{l:'⛵ Pontoane libere',a:ALL.slice(8,11)},{l:'🔥 Wellness',a:[ALL[11]]},{l:'🛏 Pensiune',a:ALL.slice(12)}];
   groups.forEach(({l,a})=>{
     const gh=document.createElement('div');gh.className='ghdr';gh.textContent=l;g.appendChild(gh);
     a.forEach(asset=>{
@@ -839,7 +900,7 @@ function rCal(){
         const bar=document.createElement('div');bar.className=`rbar ${cl.b}`;
         bar.style.left=`calc(${lp}% + 2px)`;bar.style.width=`calc(${wp}% - 4px)`;
         bar.textContent=res.nume+(res.pretStd&&res.pret!==res.pretStd?' ⚡':'');
-        bar.addEventListener('click',e=>{e.stopPropagation();openModal(res.id);});
+        bar.addEventListener('click',e=>{e.stopPropagation(); if(adm) openModal(res.id); else toast('🔐 Rezervările existente pot fi modificate doar de administrator.','err');});
         bar.addEventListener('mouseenter',e=>shTT(e,res));bar.addEventListener('mousemove',mvTT);bar.addEventListener('mouseleave',hdTT);
         cells.appendChild(bar);
       });
@@ -847,7 +908,7 @@ function rCal(){
     });
   });
 }
-function shTT(e,r){const d=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);document.getElementById('tt').innerHTML=`<strong>${r.nume}</strong><br><p>📱 ${r.tel||'—'} · 👥 ${r.persoane}</p><p>📅 ${fD(r.checkin)} → ${fD(r.checkout)} (${d}z)</p><p>💰 ${r.pret} RON${r.pretStd&&r.pret!==r.pretStd?' ⚡std:'+r.pretStd:''}</p><p>${pi} ${r.payStatus==='paid'?'Achitat':r.payStatus==='avans'?'Avans':'Neachitat'}</p>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<p>🎣 ${r.pescari} pescari</p>`:''}${r.note?`<p>📝 ${r.note}</p>`:''}`;document.getElementById('tt').classList.add('vis');mvTT(e);}
+function shTT(e,r){const d=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);document.getElementById('tt').innerHTML=`<strong>${r.nume}</strong><br><p>📱 ${r.tel||'—'} · 👥 ${r.persoane}</p><p>📅 ${fD(r.checkin)} → ${fD(r.checkout)} (${d}z)</p><p>💰 ${r.pret} RON${r.pretStd&&r.pret!==r.pretStd?' ⚡std:'+r.pretStd:''}</p><p>${pi} ${r.payStatus==='paid'?'Achitat':r.payStatus==='avans'?'Avans':'Neachitat'}</p>${t==='ponton'&&r.pescari?`<p>🎣 ${r.pescari} pescari</p>`:''}${t==='cabana'&&r.ponton?'<p>🎣 Ponton inclus</p>':''}${r.note?`<p>📝 ${r.note}</p>`:''}`;document.getElementById('tt').classList.add('vis');mvTT(e);}
 function mvTT(e){const t=document.getElementById('tt');t.style.left=Math.min(e.clientX+12,window.innerWidth-245)+'px';t.style.top=Math.min(e.clientY+12,window.innerHeight-190)+'px';}
 function hdTT(){document.getElementById('tt').classList.remove('vis');}
 // LIST
@@ -857,7 +918,7 @@ function rL(){
   const el=document.getElementById('lCnt');if(!fl.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px;margin-bottom:8px">📋</div><p>Nicio rezervare.</p></div>';return;}
   const pB=r=>r.payStatus==='paid'?'<span class="bdg b-pd">🟢 Achitat</span>':r.payStatus==='avans'?'<span class="bdg b-av">🟡 Avans</span>':'<span class="bdg b-np">🔴 Neachitat</span>';
   el.innerHTML=`<table class="rtbl"><thead><tr><th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th><th class="tc">Zile</th><th class="tr">Total</th><th class="tr">Rest</th><th class="tc">Plată</th><th class="tc">Status</th><th></th></tr></thead><tbody>
-  ${fl.map(r=>{const ci=new Date(r.checkin),co=new Date(r.checkout);const days=Math.round((co-ci)/86400000);const cl=COLS[gT2(r.asset)];const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';const stB=st==='active'?'<span class="bdg b-ac">● Activ</span>':st==='upcoming'?'<span class="bdg b-up">▸ Viitor</span>':'<span class="bdg b-dn">✓ Final</span>';const t=gT2(r.asset);const disc=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡ std:${r.pretStd}</div>`:'';return `<tr><td><span class="fx"><span class="adot ${cl.d}"></span><div>${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣 ${r.pescari}p</div>`:''}</div></span></td><td><div style="font-weight:500">${r.nume}</div>${r.tel?`<div style="font-size:11px;color:var(--tx2)">${r.tel}</div>`:''}${r.cnp?`<div style="font-size:10px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</td><td>${fFull(r.checkin)}</td><td>${fFull(r.checkout)}</td><td class="tc">${days}</td><td class="tr">${r.pret?r.pret.toLocaleString('ro-RO')+' RON':'—'}${disc}</td><td class="tr" style="color:${r.rest>0?'var(--or)':'var(--tx2)'}">${r.rest?r.rest.toLocaleString('ro-RO')+' RON':'0'}</td><td class="tc">${pB(r)}</td><td class="tc">${stB}</td><td><button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></td></tr>`;}).join('')}</tbody></table>`;
+  ${fl.map(r=>{const ci=new Date(r.checkin),co=new Date(r.checkout);const days=Math.round((co-ci)/86400000);const cl=COLS[gT2(r.asset)];const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';const stB=st==='active'?'<span class="bdg b-ac">● Activ</span>':st==='upcoming'?'<span class="bdg b-up">▸ Viitor</span>':'<span class="bdg b-dn">✓ Final</span>';const t=gT2(r.asset);const disc=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡ std:${r.pretStd}</div>`:'';return `<tr><td><span class="fx"><span class="adot ${cl.d}"></span><div>${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣 ${r.pescari}p</div>`:''}</div></span></td><td><div style="font-weight:500">${r.nume}</div>${r.tel?`<div style="font-size:11px;color:var(--tx2)">${r.tel}</div>`:''}${r.cnp?`<div style="font-size:10px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</td><td>${fFull(r.checkin)}</td><td>${fFull(r.checkout)}</td><td class="tc">${days}</td><td class="tr">${r.pret?r.pret.toLocaleString('ro-RO')+' RON':'—'}${disc}</td><td class="tr" style="color:${r.rest>0?'var(--or)':'var(--tx2)'}">${r.rest?r.rest.toLocaleString('ro-RO')+' RON':'0'}</td><td class="tc">${pB(r)}</td><td class="tc">${stB}</td><td>${adm?`<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button>`:''}</td></tr>`;}).join('')}</tbody></table>`;
 }
 // TODAY
 function rTd(){
@@ -868,7 +929,7 @@ function rTd(){
   const tdStr=now.toLocaleDateString('ro-RO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const card=(title,color,accent,list)=>list.length===0?'':
     `<div class="tcd"><div class="tch" style="color:${color};border-left-color:${accent}">${title}</div>
-    ${list.map(r=>{const days=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const cl=COLS[gT2(r.asset)];const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);return `<div class="tit"><span class="adot ${cl.d}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span><div style="flex:1;min-width:150px"><div style="font-weight:600">${r.asset}</div><div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''} · 👥 ${r.persoane}</div>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:11px;color:var(--tx2)">🎣 ${r.pescari} pescari</div>`:''} ${r.cnp?`<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</div><div style="font-size:12px;color:var(--tx2)">${fFull(r.checkin)} → ${fFull(r.checkout)} (${days}z)</div><div style="font-size:12px">${pi} ${r.rest>0?`<span style="color:var(--or)">Rest: ${r.rest} RON</span>`:'<span style="color:var(--ac2)">Achitat</span>'}</div>${r.note?`<div style="font-size:12px;color:var(--tx2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></div>`;}).join('')}</div>`;
+    ${list.map(r=>{const days=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const cl=COLS[gT2(r.asset)];const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);return `<div class="tit"><span class="adot ${cl.d}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span><div style="flex:1;min-width:150px"><div style="font-weight:600">${r.asset}</div><div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''} · 👥 ${r.persoane}</div>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:11px;color:var(--tx2)">🎣 ${r.pescari} pescari</div>`:''} ${r.cnp?`<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</div><div style="font-size:12px;color:var(--tx2)">${fFull(r.checkin)} → ${fFull(r.checkout)} (${days}z)</div><div style="font-size:12px">${pi} ${r.rest>0?`<span style="color:var(--or)">Rest: ${r.rest} RON</span>`:'<span style="color:var(--ac2)">Achitat</span>'}</div>${r.note?`<div style="font-size:12px;color:var(--tx2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}${adm?`<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button>`:''}</div>`;}).join('')}</div>`;
   document.getElementById('tdCnt').innerHTML=`<div class="thdr">🌅 ${tdStr.charAt(0).toUpperCase()+tdStr.slice(1)}</div><div class="sgrid" style="margin-bottom:14px"><div class="sc cg"><div class="sl">Check-in azi</div><div class="sv" style="color:var(--ac2)">${ci.length}</div><div class="ss">sosiri</div></div><div class="sc cr"><div class="sl">Check-out azi</div><div class="sv" style="color:#f08080">${co.length}</div><div class="ss">curățenie</div></div><div class="sc cb"><div class="sl">Ocupate azi</div><div class="sv" style="color:var(--wt2)">${st.length+ci.length}</div><div class="ss">assets</div></div><div class="sc cy"><div class="sl">Mâine</div><div class="sv" style="color:var(--gd2)">${tm.length}</div><div class="ss">de pregătit</div></div></div>${card('🚪 Check-out azi — curățenie','#f08080','var(--rd)',co)}${card('✅ Check-in azi — sosesc','var(--ac2)','var(--ac)',ci)}${card('🛏 Rămân azi','var(--wt2)','var(--wt)',st)}${card('📋 Check-in mâine','var(--gd2)','var(--gd)',tm)}${!ci.length&&!co.length&&!st.length?'<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px">😌</div><p style="margin-top:8px">Zi liniștită!</p></div>':''}`;
 }
 // REPORTS
@@ -940,7 +1001,7 @@ function fFull(dt){if(!dt)return'—';const d=new Date(dt);return d.toLocaleDate
 function populateFilters2(){
   const sel=document.getElementById('fA2');
   if(!sel||sel.options.length>1) return;
-  [{l:'Cabănuțe',a:ALL.slice(0,8)},{l:'Pontoane libere',a:ALL.slice(8,11)},{l:'Pontoane cabănuțe',a:ALL.slice(11,19)},{l:'Wellness',a:[ALL[19]]},{l:'Pensiune',a:ALL.slice(20)}].forEach(({l,a})=>{
+  [{l:'Cabănuțe',a:ALL.slice(0,8)},{l:'Pontoane libere',a:ALL.slice(8,11)},{l:'Wellness',a:[ALL[11]]},{l:'Pensiune',a:ALL.slice(12)}].forEach(({l,a})=>{
     const og=document.createElement('optgroup');og.label=l;
     a.forEach(x=>{const o=document.createElement('option');o.value=o.textContent=x;og.appendChild(o);});
     sel.appendChild(og);
@@ -951,7 +1012,7 @@ function rL2(){
   const fl=RS.filter(r=>{if(s&&!r.nume.toLowerCase().includes(s)&&!r.asset.toLowerCase().includes(s))return false;if(fa&&r.asset!==fa)return false;if(fp&&r.payStatus!==fp)return false;const ci=new Date(r.checkin),co=new Date(r.checkout);const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';if(fs&&st!==fs)return false;return true;}).sort((a,b)=>new Date(b.checkin)-new Date(a.checkin));
   const el=document.getElementById('lCnt2');if(!fl.length){el.innerHTML='<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px;margin-bottom:8px">📋</div><p>Nicio rezervare.</p></div>';return;}
   const pB=r=>r.payStatus==='paid'?'<span class="bdg b-pd">🟢 Achitat</span>':r.payStatus==='avans'?'<span class="bdg b-av">🟡 Avans</span>':'<span class="bdg b-np">🔴 Neachitat</span>';
-  el.innerHTML=`<table class="rtbl"><thead><tr><th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th><th class="tc">Zile</th><th class="tr">Total</th><th class="tr">Rest</th><th class="tc">Plată</th><th class="tc">Status</th><th></th></tr></thead><tbody>${fl.map(r=>{const ci=new Date(r.checkin),co=new Date(r.checkout);const days=Math.round((co-ci)/86400000);const cl=COLS[gT2(r.asset)];const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';const stB=st==='active'?'<span class="bdg b-ac">● Activ</span>':st==='upcoming'?'<span class="bdg b-up">▸ Viitor</span>':'<span class="bdg b-dn">✓ Final</span>';const t=gT2(r.asset);const disc=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡ std:${r.pretStd}</div>`:'';return `<tr><td><span class="fx"><span class="adot ${cl.d}"></span><div>${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣 ${r.pescari}p</div>`:''}</div></span></td><td><div style="font-weight:500">${r.nume}</div>${r.tel?`<div style="font-size:11px;color:var(--tx2)">${r.tel}</div>`:''}${r.cnp?`<div style="font-size:10px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</td><td>${fFull(r.checkin)}</td><td>${fFull(r.checkout)}</td><td class="tc">${days}</td><td class="tr">${r.pret?r.pret.toLocaleString('ro-RO')+' RON':'—'}${disc}</td><td class="tr" style="color:${r.rest>0?'var(--or)':'var(--tx2)'}">${r.rest?r.rest.toLocaleString('ro-RO')+' RON':'0'}</td><td class="tc">${pB(r)}</td><td class="tc">${stB}</td><td><button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></td></tr>`;}).join('')}</tbody></table>`;
+  el.innerHTML=`<table class="rtbl"><thead><tr><th>Asset</th><th>Client</th><th>Check-in</th><th>Check-out</th><th class="tc">Zile</th><th class="tr">Total</th><th class="tr">Rest</th><th class="tc">Plată</th><th class="tc">Status</th><th></th></tr></thead><tbody>${fl.map(r=>{const ci=new Date(r.checkin),co=new Date(r.checkout);const days=Math.round((co-ci)/86400000);const cl=COLS[gT2(r.asset)];const st=ci<=now&&co>=now?'active':ci>now?'upcoming':'done';const stB=st==='active'?'<span class="bdg b-ac">● Activ</span>':st==='upcoming'?'<span class="bdg b-up">▸ Viitor</span>':'<span class="bdg b-dn">✓ Final</span>';const t=gT2(r.asset);const disc=r.pretStd&&r.pret!==r.pretStd?`<div style="font-size:10px;color:var(--or)">⚡ std:${r.pretStd}</div>`:'';return `<tr><td><span class="fx"><span class="adot ${cl.d}"></span><div>${r.asset}${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:10px;color:var(--tx2)">🎣 ${r.pescari}p</div>`:''}</div></span></td><td><div style="font-weight:500">${r.nume}</div>${r.tel?`<div style="font-size:11px;color:var(--tx2)">${r.tel}</div>`:''}${r.cnp?`<div style="font-size:10px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</td><td>${fFull(r.checkin)}</td><td>${fFull(r.checkout)}</td><td class="tc">${days}</td><td class="tr">${r.pret?r.pret.toLocaleString('ro-RO')+' RON':'—'}${disc}</td><td class="tr" style="color:${r.rest>0?'var(--or)':'var(--tx2)'}">${r.rest?r.rest.toLocaleString('ro-RO')+' RON':'0'}</td><td class="tc">${pB(r)}</td><td class="tc">${stB}</td><td>${adm?`<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button>`:''}</td></tr>`;}).join('')}</tbody></table>`;
 }
 function rTd2(){
   const now=new Date();now.setHours(0,0,0,0);const tom=new Date(now);tom.setDate(tom.getDate()+1);
@@ -960,7 +1021,7 @@ function rTd2(){
   const ci=RS.filter(r=>mI(r,now)),co=RS.filter(r=>mO(r,now)),st=RS.filter(r=>{const a=new Date(r.checkin);a.setHours(0,0,0,0);const b=new Date(r.checkout);b.setHours(0,0,0,0);return a<now&&b>now;}),tm=RS.filter(r=>mI(r,tom));
   const tdStr=now.toLocaleDateString('ro-RO',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const card=(title,color,accent,list)=>list.length===0?'':
-    `<div class="tcd"><div class="tch" style="color:${color};border-left-color:${accent}">${title}</div>${list.map(r=>{const days=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const cl=COLS[gT2(r.asset)];const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);return `<div class="tit"><span class="adot ${cl.d}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span><div style="flex:1;min-width:150px"><div style="font-weight:600">${r.asset}</div><div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''} · 👥 ${r.persoane}</div>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:11px;color:var(--tx2)">🎣 ${r.pescari} pescari</div>`:''} ${r.cnp?`<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</div><div style="font-size:12px;color:var(--tx2)">${fFull(r.checkin)} → ${fFull(r.checkout)} (${days}z)</div><div style="font-size:12px">${pi} ${r.rest>0?`<span style="color:var(--or)">Rest: ${r.rest} RON</span>`:'<span style="color:var(--ac2)">Achitat</span>'}</div>${r.note?`<div style="font-size:12px;color:var(--tx2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button></div>`;}).join('')}</div>`;
+    `<div class="tcd"><div class="tch" style="color:${color};border-left-color:${accent}">${title}</div>${list.map(r=>{const days=Math.round((new Date(r.checkout)-new Date(r.checkin))/86400000);const cl=COLS[gT2(r.asset)];const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';const t=gT2(r.asset);return `<div class="tit"><span class="adot ${cl.d}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span><div style="flex:1;min-width:150px"><div style="font-weight:600">${r.asset}</div><div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''} · 👥 ${r.persoane}</div>${(t==='ponton'||t==='ponton-cabana')&&r.pescari?`<div style="font-size:11px;color:var(--tx2)">🎣 ${r.pescari} pescari</div>`:''} ${r.cnp?`<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>`:''}</div><div style="font-size:12px;color:var(--tx2)">${fFull(r.checkin)} → ${fFull(r.checkout)} (${days}z)</div><div style="font-size:12px">${pi} ${r.rest>0?`<span style="color:var(--or)">Rest: ${r.rest} RON</span>`:'<span style="color:var(--ac2)">Achitat</span>'}</div>${r.note?`<div style="font-size:12px;color:var(--tx2);font-style:italic;width:100%">📝 ${r.note}</div>`:''}${adm?`<button class="btn btn-s btn-sm" onclick="openModal('${r.id}')">✏️</button>`:''}</div>`;}).join('')}</div>`;
   document.getElementById('tdCnt2').innerHTML=`<div class="thdr">🌅 ${tdStr.charAt(0).toUpperCase()+tdStr.slice(1)}</div><div class="sgrid" style="margin-bottom:14px"><div class="sc cg"><div class="sl">Check-in azi</div><div class="sv" style="color:var(--ac2)">${ci.length}</div><div class="ss">sosiri</div></div><div class="sc cr"><div class="sl">Check-out azi</div><div class="sv" style="color:#f08080">${co.length}</div><div class="ss">curățenie</div></div><div class="sc cb"><div class="sl">Ocupate azi</div><div class="sv" style="color:var(--wt2)">${st.length+ci.length}</div><div class="ss">assets</div></div><div class="sc cy"><div class="sl">Mâine</div><div class="sv" style="color:var(--gd2)">${tm.length}</div><div class="ss">de pregătit</div></div></div>${card('🚪 Check-out azi','#f08080','var(--rd)',co)}${card('✅ Check-in azi','var(--ac2)','var(--ac)',ci)}${card('🛏 Rămân azi','var(--wt2)','var(--wt)',st)}${card('📋 Check-in mâine','var(--gd2)','var(--gd)',tm)}${!ci.length&&!co.length&&!st.length?'<div style="text-align:center;padding:40px;color:var(--tx2)"><div style="font-size:36px">😌</div><p style="margin-top:8px">Zi liniștită!</p></div>':''}`;
 }
 function sP2(p,btn){rPer2=p;document.querySelectorAll('#at-c-reports .pb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');rRp2();}
