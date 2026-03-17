@@ -961,15 +961,18 @@ async function loadData(silent=false) {
         ...e,
         suma: parseFloat(e.suma)||0,
       }));
-      localStorage.setItem('lm_rs_backup', JSON.stringify(RS));
-      localStorage.setItem('lm_ex_backup', JSON.stringify(EX));
+      // Save with v3 keys only
+      localStorage.setItem('lm_v3_rs', JSON.stringify(RS));
+      localStorage.setItem('lm_v3_ex', JSON.stringify(EX));
+      // Always clear old version data
+      ['lm_rs_backup','lm_ex_backup','lm_v02f','lm_ex_v02','lm_v02c','lm_expenses_v02'].forEach(k=>localStorage.removeItem(k));
       if(!silent) toast('✓ Date actualizate', 'ok');
     }
   } catch(e) {
-    // Fallback to local backup
+    // Offline fallback - v3 data only
     try {
-      const rs = localStorage.getItem('lm_rs_backup');
-      const ex = localStorage.getItem('lm_ex_backup');
+      const rs = localStorage.getItem('lm_v3_rs');
+      const ex = localStorage.getItem('lm_v3_ex');
       if(rs) RS = JSON.parse(rs);
       if(ex) EX = JSON.parse(ex);
     } catch(_){}
@@ -1933,7 +1936,7 @@ async function addExpense() {
   if(!date||!suma){toast('⚠ Completați data și suma','err');return;}
   const ex={id:gid(),date,cat,suma,bon,desc,createdAt:new Date().toISOString()};
   EX.push(ex);
-  localStorage.setItem('lm_ex_backup',JSON.stringify(EX));
+  localStorage.setItem('lm_v3_ex',JSON.stringify(EX));
   $('es').value='';$('eb').value='';$('edesc').value='';
   renderExpenses();toast('✓ Cheltuială adăugată!');
   saveExpToSheets(ex);
@@ -1941,7 +1944,7 @@ async function addExpense() {
 async function deleteExpense(id){
   if(!confirm('Ștergi această cheltuială?'))return;
   EX=EX.filter(e=>e.id!==id);
-  localStorage.setItem('lm_ex_backup',JSON.stringify(EX));
+  localStorage.setItem('lm_v3_ex',JSON.stringify(EX));
   renderExpenses();toast('✓ Cheltuială ștearsă');
   deleteExpFromSheets(id);
 }
@@ -2248,7 +2251,7 @@ async function saveRes() {
   if(editId) {
     const i=RS.findIndex(x=>x.id===editId);
     RS[i]={...RS[i],...base, id:editId, asset:assets[0]};
-    localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
+    localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
     closeModal(); refreshAdmin(); toast('✓ Rezervare actualizată!');
     saveToSheets(RS.find(x=>x.id===editId));
   } else {
@@ -2258,7 +2261,7 @@ async function saveRes() {
       const r = { ...base, id:gid(), asset, pret:assets.length>1?price:pret, pretStd:assets.length>1?price:autoP||pret, rest:assets.length>1?price:Math.max(0,pret-avans), avans:assets.length>1?0:avans, createdAt:new Date().toISOString() };
       RS.push(r); newRezs.push(r);
     });
-    localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
+    localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
     closeModal(); refreshAdmin();
     toast(assets.length>1?`✓ ${assets.length} rezervări salvate!`:'✓ Rezervare salvată!');
     Promise.all(newRezs.map(r=>saveToSheets(r)));
@@ -2271,7 +2274,7 @@ async function deleteRes() {
   if(!confirm(`Ștergi: ${r?.nome||r?.nume} — ${r?.asset}?`)) return;
   const id=editId;
   RS=RS.filter(x=>x.id!==editId);
-  localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
+  localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
   closeModal(); refreshAdmin(); toast('✓ Rezervare ștearsă');
   deleteFromSheets(id);
 }
@@ -2291,19 +2294,23 @@ function exportCSV() {
 loadPrices();
 initPublic();
 
-// Load data silently for public calendar
+// Load data from Sheets only - localStorage used only as offline fallback
 (async () => {
   try {
     const d = await apiGet();
     if(d.ok) {
       RS = (d.rezervari||[]).map(r=>({...r,pret:parseFloat(r.pret)||0,pretStd:parseFloat(r.pretStd)||0,avans:parseFloat(r.avans)||0,rest:parseFloat(r.rest)||0,pescari:parseInt(r.pescari)||0,persoane:parseInt(r.persoane)||1,pontonOnly:r.pontonOnly==='true'||r.pontonOnly===true})).filter(r=>r.id);
       EX = (d.cheltuieli||[]).map(e=>({...e,suma:parseFloat(e.suma)||0}));
-      localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
-      localStorage.setItem('lm_ex_backup',JSON.stringify(EX));
+      // Save to localStorage ONLY as offline backup, with version key
+      localStorage.setItem('lm_v3_rs', JSON.stringify(RS));
+      localStorage.setItem('lm_v3_ex', JSON.stringify(EX));
+      // Clear old localStorage keys from previous versions
+      ['lm_rs_backup','lm_ex_backup','lm_v02f','lm_ex_v02','lm_v02c','lm_expenses_v02'].forEach(k=>localStorage.removeItem(k));
     }
   } catch(e) {
-    try{const rs=localStorage.getItem('lm_rs_backup');if(rs)RS=JSON.parse(rs);}catch(_){}
-    try{const ex=localStorage.getItem('lm_ex_backup');if(ex)EX=JSON.parse(ex);}catch(_){}
+    // Offline fallback - only use v3 backup, never old data
+    try{const rs=localStorage.getItem('lm_v3_rs');if(rs)RS=JSON.parse(rs);}catch(_){}
+    try{const ex=localStorage.getItem('lm_v3_ex');if(ex)EX=JSON.parse(ex);}catch(_){}
   }
 })();
 </script>
