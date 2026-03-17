@@ -767,12 +767,17 @@ textarea.finput{resize:vertical;min-height:70px}
       </div>
       <div id="daysInfo" style="font-size:12px;color:var(--ac2);font-weight:600;margin-top:-6px;margin-bottom:10px"></div>
 
-      <!-- Price preview -->
+      <!-- Price manual in admin -->
       <div class="price-box" id="priceBox" style="display:none">
-        <div class="pb-lbl">Preț calculat automat</div>
-        <div class="pb-amt" id="priceAmt"></div>
+        <div class="pb-lbl">Calcul preț</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+          <input type="number" id="pretPerNoapte" class="finput" placeholder="Preț/noapte sau sesiune" min="0" oninput="calcFromUnit()" style="width:200px">
+          <span style="color:var(--tx2);font-size:13px">×</span>
+          <span id="noptiLabel" style="color:var(--ac2);font-weight:600;font-size:15px"></span>
+          <span style="color:var(--tx2);font-size:13px">=</span>
+          <span id="totalCalc" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ac2)"></span>
+        </div>
         <div class="pb-brk" id="priceBrk"></div>
-        <div id="discountTag" class="discount-tag" style="display:none">⚡ Preț modificat manual</div>
       </div>
 
       <div class="sec-title">Plată</div>
@@ -815,7 +820,7 @@ textarea.finput{resize:vertical;min-height:70px}
 // ═══════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════
-const API = 'https://script.google.com/macros/s/AKfycbz3-3G1mpyVrqrvkAWjLGX8G7XTy44GLYzZsCn6RbZ37VQZfLsOg3xLzD0UHnuQHzQ4/exec';
+const API = 'https://script.google.com/macros/s/AKfycbyW_dQucZeqHC8cMOIB7zFmdiYVELh2LuyXcEPIdE-IYwoMaaKwSXOqJTTOzR4vKwih/exec';
 const PASS = 'Abundenta';
 const SPLIT = { owner: 0.60, admin: 0.40 };
 
@@ -2056,7 +2061,7 @@ function openModal(id=null, preAsset=null, preDate=null) {
     $('mCO').value = r.checkout ? r.checkout.slice(0,16) : '';
     $('mSD').value = r.checkin ? r.checkin.slice(0,10) : '';
     $('mSOra').value = r.checkin ? r.checkin.slice(11,16) : '14:00';
-    $('mPret').value = r.pret||'';
+    $('mPret').value = r.pret||''; if($('pretPerNoapte'))$('pretPerNoapte').value='';
     $('mAvans').value = r.avans||'';
     $('mRest').value = r.rest||'';
     $('mDataPlata').value = r.dataPlata||'';
@@ -2086,7 +2091,7 @@ function openModal(id=null, preAsset=null, preDate=null) {
     const out=new Date(b);out.setDate(out.getDate()+1);out.setHours(11,0,0,0);
     $('mCO').value = dtStr(out);
     $('mSD').value = dStr(b); $('mSOra').value='14:00';
-    $('mPret').value='';$('mAvans').value='';$('mRest').value='';$('mDataPlata').value='';
+    $('mPret').value='';$('mAvans').value='';$('mRest').value='';$('mDataPlata').value='';if($('pretPerNoapte'))$('pretPerNoapte').value='';
     $('mPontonOnly').checked=false;$('pontonPescariSection').style.display='none';
     setPayStatus('none',false);
     onAssetChange(); calcPrice();
@@ -2129,45 +2134,61 @@ function calcPrice() {
   const isSauna = type==='sauna'||type==='masaj';
   const isPonton = type==='ponton';
   const pontonOnly = $('mPontonOnly').checked;
-  const pescari = isPonton
-    ? (parseInt($('mPescariPonton').value)||1)
-    : pontonOnly ? (parseInt($('mPescari').value)||1) : 0;
 
-  let ciDate, coDate;
-  if(isSauna) { ciDate=coDate=$('mSD').value; }
-  else { ciDate=$('mCI').value.slice(0,10); coDate=$('mCO').value.slice(0,10); }
-
-  // Days info
-  if(!isSauna && ciDate && coDate) {
-    const d = getDays(ciDate, coDate);
-    $('daysInfo').textContent = d>0 ? `📅 ${d} zi${d>1?'le':''}` : d===0 ? '' : '⚠️ Check-out după check-in!';
-  } else if(isSauna && ciDate) {
-    $('daysInfo').textContent = `🔥 Sesiune · ${ciDate}`;
+  let ciDate, coDate, days=0;
+  if(isSauna) {
+    ciDate=coDate=$('mSD').value;
+    days=1;
+  } else {
+    ciDate=$('mCI').value.slice(0,10);
+    coDate=$('mCO').value.slice(0,10);
+    days = getDays(ciDate, coDate);
   }
 
-  const calcName = pontonOnly ? 'Ponton 1' : first;
-  const { price, breakdown } = calcAutoPrice(calcName, ciDate, coDate, pescari, false);
-  autoP = price;
+  // Days info text
+  if(!isSauna && ciDate && coDate) {
+    if(days>0) $('daysInfo').textContent = `📅 ${days} zi${days>1?'le':''}`;
+    else if(days<=0) $('daysInfo').textContent = '⚠️ Check-out trebuie după check-in!';
+  } else if(isSauna && ciDate) {
+    $('daysInfo').textContent = `🔥 Sesiune fixă`;
+  }
 
-  if(price > 0) {
+  // Show price box if dates are valid
+  if((isSauna && ciDate) || (days>0)) {
     $('priceBox').style.display='block';
-    $('priceAmt').textContent = fmtMoney(price);
-    $('priceBrk').innerHTML = breakdown.replace(/\n/g,'<br>');
-    if(!$('mPret').value) $('mPret').value = price;
+    // Update units label
+    const pescari = isPonton ? (parseInt($('mPescariPonton').value)||1)
+      : pontonOnly ? (parseInt($('mPescari').value)||1) : 0;
+    let unitLabel = '';
+    if(isSauna) unitLabel = '1 sesiune';
+    else if(isPonton || pontonOnly) unitLabel = `${days} zi${days>1?'le':''} × ${pescari} pescari`;
+    else unitLabel = `${days} zi${days>1?'le':''}`;
+    $('noptiLabel').textContent = unitLabel;
+
+    // Auto-calc if price per unit filled
+    const ppu = parseFloat($('pretPerNoapte').value)||0;
+    if(ppu > 0) {
+      let total;
+      if(isSauna) total = ppu;
+      else if(isPonton || pontonOnly) total = ppu * days * pescari;
+      else total = ppu * days;
+      $('totalCalc').textContent = fmtMoney(total);
+      $('mPret').value = total;
+      autoP = total;
+    }
+    $('priceBrk').textContent = '';
   } else {
     $('priceBox').style.display='none';
   }
   calcRest();
 }
 
+function calcFromUnit() {
+  calcPrice();
+}
+
 function onPretEdit() {
-  const m = parseFloat($('mPret').value)||0;
-  if(autoP>0 && m!==autoP) {
-    $('discountTag').style.display='inline-flex';
-    $('pretInfo').textContent=`Standard: ${fmtMoney(autoP)} · Diferență: ${fmtMoney(m-autoP)}`;
-  } else {
-    $('discountTag').style.display='none'; $('pretInfo').textContent='';
-  }
+  // Price is fully manual in admin - just recalc rest
   calcRest();
 }
 
@@ -2218,7 +2239,7 @@ async function saveRes() {
     cnp:$('mCnp').value.trim(), actSerie:$('mAct').value.trim(), actAut:$('mAut').value.trim(),
     checkin:ci, checkout:co, pret, avans, rest:Math.max(0,pret-avans),
     payStatus:paySt, dataPlata:$('mDataPlata').value||'',
-    pretStd:autoP||pret, pontonOnly,
+    pretStd:pret, pontonOnly,
     pescari:pontonOnly?(parseInt($('mPescari').value)||0):(type==='ponton'?parseInt($('mPescariPonton').value)||0:0),
     status:$('mStatus').value,
     note:$('mNote').value.trim(),
