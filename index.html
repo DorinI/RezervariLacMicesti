@@ -769,6 +769,7 @@ textarea.finput{resize:vertical;min-height:70px}
 
       <!-- Price manual in admin -->
       <div class="price-box" id="priceBox" style="display:none">
+        <div id="discountTag" class="discount-tag" style="display:none">⚡ Preț modificat</div>
         <div class="pb-lbl">Calcul preț</div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
           <input type="number" id="pretPerNoapte" class="finput" placeholder="Preț/noapte sau sesiune" min="0" oninput="calcFromUnit()" style="width:200px">
@@ -2046,7 +2047,7 @@ function openModal(id=null, preAsset=null, preDate=null) {
   editId=id; autoP=0;
   $('modalTitle').textContent = id ? 'Editează rezervarea' : 'Rezervare nouă';
   $('btnDelete').style.display = id ? 'flex' : 'none';
-  $('discountTag').style.display='none'; $('pretInfo').textContent='';
+  if($('discountTag'))$('discountTag').style.display='none'; $('pretInfo').textContent='';
 
   if(id) {
     const r = RS.find(x=>x.id===id); if(!r) return;
@@ -2080,8 +2081,8 @@ function openModal(id=null, preAsset=null, preDate=null) {
       $('pontonPescariSection').style.display='none';
     }
     if(r.pretStd && r.pret!==r.pretStd) {
-      $('discountTag').style.display='inline-flex';
-      $('pretInfo').textContent = `Standard: ${fmtMoney(r.pretStd)} · Diferență: ${fmtMoney(r.pret-r.pretStd)}`;
+      if($('discountTag'))$('discountTag').style.display='inline-flex';
+      if($('pretInfo'))$('pretInfo').textContent = `Standard: ${fmtMoney(r.pretStd)} · Diferență: ${fmtMoney(r.pret-r.pretStd)}`;
     }
   } else {
     initAssets(preAsset ? [preAsset] : ['Cabănuța 1']);
