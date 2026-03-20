@@ -1388,7 +1388,7 @@ function renderToday() {
           <span class="dot ${c.dot}" style="width:9px;height:9px;flex-shrink:0;margin-top:3px"></span>
           <div style="flex:1;min-width:160px">
             <div style="font-weight:600">${r.asset}${r.pontonOnly?' <span style="font-size:10px;color:var(--wt3)">(🎣 ponton)</span>':''}</div>
-            <div style="font-size:12px;color:var(--tx2)">${r.nume}${r.tel?' · '+r.tel:''}${r.email?' · '+r.email:''}</div>
+            <div style="font-size:12px;color:var(--tx2)">${r.nome||r.nume||""}${r.tel?' · '+r.tel:''}${r.email?' · '+r.email:''}</div>
             ${r.cnp ? `<div style="font-size:11px;color:var(--tx3)">CNP: ${r.cnp}</div>` : ''}
           </div>
           <div style="font-size:12px;color:var(--tx2)">${fmtFull(r.checkin)} → ${fmtFull(r.checkout)} (${days}z)</div>
@@ -1484,7 +1484,7 @@ function renderAdmCalendar() {
         bar.className = `res-bar ${barClass}`;
         bar.style.left = `calc(${lp}% + 2px)`;
         bar.style.width = `calc(${wp}% - 4px)`;
-        bar.textContent = res.nume + (res.status==='pending'?' ⏳':'') + (res.pretStd&&res.pret!==res.pretStd?' ⚡':'');
+        bar.textContent = (res.nome||res.nume||'?') + (res.status==='pending'?' ⏳':'') + (res.pretStd&&res.pret!==res.pretStd?' ⚡':'');
         bar.addEventListener('click', e => { e.stopPropagation(); openModal(res.id); });
         bar.addEventListener('mouseenter', e => showTT(e, res));
         bar.addEventListener('mousemove', moveTT);
@@ -1501,7 +1501,7 @@ function showTT(e, r) {
   const days = getDays(r.checkin, r.checkout);
   const pi = r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';
   $('tooltip').innerHTML = `
-    <strong>${r.nume}</strong><br>
+    <strong>${r.nome||r.nume||""}</strong><br>
     <span style="color:var(--tx2)">📱 ${r.tel||'—'}</span><br>
     <span style="color:var(--tx2)">✉️ ${r.email||'—'}</span><br>
     <span style="color:var(--tx2)">📅 ${fmtFull(r.checkin)} → ${fmtFull(r.checkout)} (${days}z)</span><br>
@@ -1548,7 +1548,7 @@ function renderList() {
   const fP = $('fPay').value;
 
   const filtered = RS.filter(r => {
-    if(search && !r.nume.toLowerCase().includes(search) && !r.asset.toLowerCase().includes(search) && !(r.email||'').toLowerCase().includes(search)) return false;
+    if(search && !(r.nome||r.nume||'').toLowerCase().includes(search) && !r.asset.toLowerCase().includes(search) && !(r.email||'').toLowerCase().includes(search)) return false;
     if(fA && r.asset !== fA) return false;
     if(fP && r.payStatus !== fP) return false;
     if(fS) {
@@ -1854,7 +1854,7 @@ function renderClients() {
   // Build unique client list
   const clients = {};
   RS.forEach(r => {
-    const key = r.email || r.tel || r.nume;
+    const key = r.email || r.tel || r.nome || r.nume;
     if(!clients[key]) {
       clients[key] = { name: r.nome||r.nume, tel: r.tel, email: r.email, bookings: 0, total: 0, lastVisit: r.checkin };
     }
@@ -1928,7 +1928,7 @@ async function addExpense() {
   if(!date||!suma){toast('⚠ Completați data și suma','err');return;}
   const ex={id:gid(),date,cat,suma,bon,desc,createdAt:new Date().toISOString()};
   EX.push(ex);
-  localStorage.setItem('lm_ex_backup',JSON.stringify(EX));
+  localStorage.setItem('lm_v3_ex',JSON.stringify(EX));
   $('es').value='';$('eb').value='';$('edesc').value='';
   renderExpenses();toast('✓ Cheltuială adăugată!');
   saveExpToSheets(ex);
@@ -1936,7 +1936,7 @@ async function addExpense() {
 async function deleteExpense(id){
   if(!confirm('Ștergi această cheltuială?'))return;
   EX=EX.filter(e=>e.id!==id);
-  localStorage.setItem('lm_ex_backup',JSON.stringify(EX));
+  localStorage.setItem('lm_v3_ex',JSON.stringify(EX));
   renderExpenses();toast('✓ Cheltuială ștearsă');
   deleteExpFromSheets(id);
 }
@@ -2052,8 +2052,8 @@ function openModal(id=null, preAsset=null, preDate=null) {
     $('mAct').value = r.actSerie||'';
     $('mAut').value = r.actAut||'';
     $('mNote').value = r.note||'';
-    $('mCI').value = r.checkin ? r.checkin.slice(0,16) : '';
-    $('mCO').value = r.checkout ? r.checkout.slice(0,16) : '';
+    $('mCI').value = r.checkin ? toDatetimeLocal(r.checkin) : '';
+    $('mCO').value = r.checkout ? toDatetimeLocal(r.checkout) : '';
     $('mSD').value = r.checkin ? r.checkin.slice(0,10) : '';
     $('mSOra').value = r.checkin ? r.checkin.slice(11,16) : '14:00';
     $('mPret').value = r.pret||'';
@@ -2227,7 +2227,7 @@ async function saveRes() {
   if(editId) {
     const i=RS.findIndex(x=>x.id===editId);
     RS[i]={...RS[i],...base, id:editId, asset:assets[0]};
-    localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
+    localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
     closeModal(); refreshAdmin(); toast('✓ Rezervare actualizată!');
     saveToSheets(RS.find(x=>x.id===editId));
   } else {
@@ -2237,7 +2237,7 @@ async function saveRes() {
       const r = { ...base, id:gid(), asset, pret:assets.length>1?price:pret, pretStd:assets.length>1?price:autoP||pret, rest:assets.length>1?price:Math.max(0,pret-avans), avans:assets.length>1?0:avans, createdAt:new Date().toISOString() };
       RS.push(r); newRezs.push(r);
     });
-    localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
+    localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
     closeModal(); refreshAdmin();
     toast(assets.length>1?`✓ ${assets.length} rezervări salvate!`:'✓ Rezervare salvată!');
     Promise.all(newRezs.map(r=>saveToSheets(r)));
@@ -2250,7 +2250,7 @@ async function deleteRes() {
   if(!confirm(`Ștergi: ${r?.nome||r?.nume} — ${r?.asset}?`)) return;
   const id=editId;
   RS=RS.filter(x=>x.id!==editId);
-  localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
+  localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
   closeModal(); refreshAdmin(); toast('✓ Rezervare ștearsă');
   deleteFromSheets(id);
 }
@@ -2279,8 +2279,8 @@ initPublic();
     if(d.ok) {
       RS = (d.rezervari||[]).map(r=>({...r,pret:parseFloat(r.pret)||0,pretStd:parseFloat(r.pretStd)||0,avans:parseFloat(r.avans)||0,rest:parseFloat(r.rest)||0,pescari:parseInt(r.pescari)||0,persoane:parseInt(r.persoane)||1,pontonOnly:r.pontonOnly==='true'||r.pontonOnly===true})).filter(r=>r.id);
       EX = (d.cheltuieli||[]).map(e=>({...e,suma:parseFloat(e.suma)||0}));
-      localStorage.setItem('lm_rs_backup',JSON.stringify(RS));
-      localStorage.setItem('lm_ex_backup',JSON.stringify(EX));
+      localStorage.setItem('lm_v3_rs',JSON.stringify(RS));
+      localStorage.setItem('lm_v3_ex',JSON.stringify(EX));
     }
   } catch(e) {
     try{const rs=localStorage.getItem('lm_rs_backup');if(rs)RS=JSON.parse(rs);}catch(_){}
