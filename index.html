@@ -1864,7 +1864,7 @@ async function saveRes() {
   if(isPonton){
     const pd=$('M_PD').value, nz=parseInt($('M_PZILE').value)||1;
     ci=pd+'T06:00';
-    const cod=new Date(pd); cod.setDate(cod.getDate()+nz); co=dStr(cod)+'T20:00';
+    const cod=new Date(pd); cod.setDate(cod.getDate()+(nz-1)); co=dStr(cod)+'T20:00';
   } else if(isSpa){
     const sd=$('M_SD').value, so=$('M_SORA').value;
     ci=sd+'T'+(so||'14:00'); co=sd+'T18:00';
