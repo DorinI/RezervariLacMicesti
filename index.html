@@ -611,10 +611,78 @@ textarea.fi{resize:vertical;min-height:70px}
 .fadein{animation:fadein .3s ease forwards}
 
 @media print{
-  #pub,#adm .adm-hdr,.adm-tabs,.np{display:none!important}
-  body{background:#fff;color:#000}
-  .tbl th,.tbl td{color:#000;border-color:#ccc}
-  .card,.sc,.tbl{border-color:#ddd;background:#fff}
+  /* Ascunde navigare si butoane */
+  #pub,#adm .adm-hdr,.adm-tabs,.np,
+  .btn,button,.mbg,#toast,#sbar,
+  .adm-acts,.fbar,#MBG,#tip{display:none!important}
+
+  /* Reset culori pentru print */
+  *{
+    background:transparent!important;
+    color:#000!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  body{background:#fff!important;font-size:11pt;font-family:Arial,sans-serif}
+
+  /* Asigura ca adminul e vizibil */
+  #adm{display:block!important}
+  .adm-view.on{display:block!important}
+  .adm-main{padding:0!important;max-width:100%!important}
+
+  /* Tabele */
+  .tbl{width:100%;border-collapse:collapse;border:1px solid #999}
+  .tbl th{background:#eee!important;color:#000!important;padding:7px 10px;border:1px solid #999;font-size:10pt}
+  .tbl td{padding:6px 10px;border:1px solid #ddd;font-size:10pt;color:#000!important}
+  .tbl tr:nth-child(even) td{background:#f9f9f9!important}
+  .tbl .trow td{background:#eee!important;font-weight:700}
+
+  /* Cards si stats */
+  .card{border:1px solid #ccc;border-radius:4px;margin-bottom:12px;page-break-inside:avoid}
+  .card-h{background:#eee!important;padding:8px 12px;border-bottom:1px solid #ccc}
+  .card-ht{font-size:13pt;font-weight:700;color:#000!important}
+  .card-b{padding:10px 12px}
+  .sc{border:1px solid #ccc;border-radius:4px;padding:10px}
+  .srow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .sc .sl{font-size:9pt;color:#555!important;text-transform:uppercase}
+  .sc .sv{font-size:18pt;font-weight:700;color:#000!important}
+
+  /* Bar chart */
+  .brow{border-bottom:1px solid #eee;padding:5px 0}
+  .btrack{background:#eee!important;height:8px}
+  .bfill{background:#555!important}
+
+  /* Status badges */
+  .st-pnd,.st-cnf,.st-act,.st-don,.st-can{
+    border:1px solid #999!important;
+    padding:1px 6px;border-radius:4px;font-size:9pt;
+    background:#eee!important;color:#000!important;
+  }
+  .bdg-moss,.bdg-amber,.bdg-clay,.bdg-tide,.bdg-fog{
+    border:1px solid #999!important;background:#eee!important;color:#000!important;
+  }
+
+  /* Rapoarte - titlu pagina */
+  #v-rep::before{content:"Raport Lacul Micești";display:block;font-size:18pt;font-weight:700;margin-bottom:16px;text-align:center}
+  .rper{display:none!important}
+
+  /* Page breaks */
+  .card{page-break-inside:avoid}
+  h2,h3{page-break-after:avoid}
+
+  /* Dots - colorate la print */
+  .dc{background:#2e6b50!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .dp{background:#2563a8!important;-webkit-print-color-adjust:exact}
+  .ds{background:#c2622a!important;-webkit-print-color-adjust:exact}
+  .dn{background:#6d3fad!important;-webkit-print-color-adjust:exact}
+
+  /* Remove gradients from stat cards */
+  .sc::before{display:none!important}
+
+  /* Margins */
+  @page{margin:1.5cm;size:A4}
 }
 @media(max-width:640px){
   .adm-main{padding:12px}
