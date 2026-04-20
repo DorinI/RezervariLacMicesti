@@ -684,6 +684,28 @@ textarea.fi{resize:vertical;min-height:70px}
   /* Margins */
   @page{margin:1.5cm;size:A4}
 }
+/* ══ RAPOARTE — carduri verticale ══ */
+.rep-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid rgba(42,80,96,.25);
+  gap:12px;
+}
+.rep-row:last-child{border-bottom:none}
+.rep-row-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;display:flex;align-items:center;gap:8px}
+.rep-row-lbl::before{content:'';width:3px;height:16px;border-radius:2px;flex-shrink:0}
+.rep-row.rg .rep-row-lbl::before{background:var(--fern)}
+.rep-row.ry .rep-row-lbl::before{background:var(--honey)}
+.rep-row.rr .rep-row-lbl::before{background:#fca5a5}
+.rep-row.rs .rep-row-lbl::before{background:var(--silver)}
+.rep-row-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1}
+.rep-row.rg .rep-row-val{color:var(--dew)}
+.rep-row.ry .rep-row-val{color:var(--honey)}
+.rep-row.rr .rep-row-val{color:#fca5a5}
+.rep-row.rs .rep-row-val{color:var(--silver)}
+
+/* badge facturat */
+.bdg-fact{background:rgba(196,120,32,.15);color:var(--honey);border:1px solid rgba(196,120,32,.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.3px}
+
 @media(max-width:640px){
   .adm-main{padding:12px}
   .frow{grid-template-columns:1fr}
@@ -988,6 +1010,15 @@ textarea.fi{resize:vertical;min-height:70px}
       <div class="frow"><div class="fg"><label>Preț total (RON) — editabil liber</label><input class="fi" id="M_PRET" type="number" min="0" placeholder="0" oninput="calcRest()"></div><div class="fg"><label>Avans încasat (RON)</label><input class="fi" id="M_AVANS" type="number" min="0" placeholder="0" oninput="calcRest()"></div></div>
       <div class="frow"><div class="fg"><label>Rest de plată</label><input class="fi" id="M_REST" type="number" readonly></div><div class="fg"><label>Data plată integrală</label><input class="fi" id="M_DPL" type="date"></div></div>
 
+      <div class="stl">Facturare</div>
+      <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(196,120,32,.06);border:1px solid rgba(196,120,32,.2);border-radius:var(--r8);cursor:pointer;margin-bottom:14px">
+        <input type="checkbox" id="M_FACTURAT" style="width:15px;height:15px;accent-color:var(--gold);flex-shrink:0">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--honey)">🧾 Rezervare facturată</div>
+          <div style="font-size:11px;color:var(--t3)">Suma merge în CA impozabilă · TVA 11% se calculează automat</div>
+        </div>
+      </label>
+
       <div class="stl">Observații</div>
       <div class="fg"><textarea class="fi" id="M_NOTE" placeholder="Cerințe speciale, informații suplimentare..."></textarea></div>
     </div>
@@ -1110,6 +1141,7 @@ function parseRS(arr) {
     pescari:  parseInt(r.pescari)||0,
     persoane: parseInt(r.persoane)||1,
     pontonOnly: r.pontonOnly==='true'||r.pontonOnly===true,
+    facturat:   r.facturat==='true'||r.facturat===true,
   })).filter(r=>r.id);
 }
 function parseEX(arr) {
@@ -1584,9 +1616,14 @@ function renderRep() {
   const s=new Date(fv);s.setHours(0,0,0,0);
   const e=new Date(tv);e.setHours(23,59,59,999);
   const lbl=`${fD(fv)} — ${fD(tv)}`;
-  const inP=RS.filter(r=>r.status!=='cancelled'&&new Date(r.checkin)>=s&&new Date(r.checkin)<=e);
-  const inE=EX.filter(ex=>{const d=new Date(ex.date);d.setHours(0,0,0,0);return d>=s&&d<=e;});
 
+  // Separam: nefacturate → CA normala, facturate → CA impozabila
+  const inAll=RS.filter(r=>r.status!=='cancelled'&&new Date(r.checkin)>=s&&new Date(r.checkin)<=e);
+  const inP   =inAll.filter(r=>!r.facturat);   // normale
+  const inF   =inAll.filter(r=>r.facturat);     // facturate
+  const inE   =EX.filter(ex=>{const d=new Date(ex.date);d.setHours(0,0,0,0);return d>=s&&d<=e;});
+
+  // CA normala
   const bT={cabana:0,ponton:0,sauna:0,masaj:0,pensiune:0};
   const bA={}; ASSETS.forEach(a=>bA[a.name]={c:0,r:0,n:0});
   inP.forEach(r=>{
@@ -1594,32 +1631,61 @@ function renderRep() {
     bT[rt]=(bT[rt]||0)+r.pret;
     if(bA[r.asset]){bA[r.asset].c++;bA[r.asset].r+=r.pret;bA[r.asset].n+=gDays(r.checkin,r.checkout);}
   });
-  const totR=inP.reduce((s,r)=>s+r.pret,0);
-  const totAv=inP.reduce((s,r)=>s+r.avans,0);
-  const totRst=inP.reduce((s,r)=>s+r.rest,0);
-  const totE=inE.reduce((s,e)=>s+e.suma,0);
+  const totR   =inP.reduce((s,r)=>s+r.pret,0);
+  const totAv  =inP.reduce((s,r)=>s+r.avans,0);
+  const totRst =inP.reduce((s,r)=>s+r.rest,0);
+  const totE   =inE.reduce((s,e)=>s+e.suma,0);
   const o60=Math.round(totR*SPL.o), a40=Math.round(totR*SPL.a), netO=Math.max(0,o60-totE);
-  const pnd=inP.filter(r=>r.status==='pending');
+  const pnd=inAll.filter(r=>r.status==='pending');
   const mxA=Math.max(...Object.values(bA).map(x=>x.r),1);
   const tRows=[['🏠 Cabănuțe','cabana'],['⛵ Pontoane','ponton'],['🔥 Saună & Ciubăr','sauna'],['💆 Masaj','masaj'],['🛏 Pensiune','pensiune']].filter(([,k])=>bT[k]>0);
 
+  // CA impozabila (facturate)
+  const TVA_RATE = 0.11;
+  const totF    =inF.reduce((s,r)=>s+r.pret,0);          // total cu TVA
+  const totFtva =Math.round(totF/1.11*TVA_RATE*100)/100;  // TVA extras
+  const totFbaza=Math.round((totF-totFtva)*100)/100;       // baza fara TVA
+  const fO60=Math.round(totFbaza*SPL.o), fA40=Math.round(totFbaza*SPL.a);
+  const bTf={cabana:0,ponton:0,sauna:0,masaj:0,pensiune:0};
+  inF.forEach(r=>{const rt=r.pontonOnly?'ponton':r.type;bTf[rt]=(bTf[rt]||0)+r.pret;});
+  const tRowsF=[['🏠 Cabănuțe','cabana'],['⛵ Pontoane','ponton'],['🔥 Saună & Ciubăr','sauna'],['💆 Masaj','masaj'],['🛏 Pensiune','pensiune']].filter(([,k])=>bTf[k]>0);
+
   $('repBody').innerHTML=`
+
+  <!-- ══ CA NORMALĂ ══ -->
   <div class="card" style="margin-bottom:13px">
-    <div class="card-h"><div class="card-ht">📊 Sumar — ${lbl}</div><span style="color:var(--t3);font-size:12px">${inP.length} rezervări${pnd.length?' · '+pnd.length+' pending':''}</span></div>
-    <div class="card-b"><div class="srow" style="margin-bottom:0">
-      <div class="sc cg"><div class="sl">CA Brută</div><div class="sv" style="font-size:20px;color:var(--dew)">${fM(totR)}</div></div>
-      <div class="sc cy"><div class="sl">Avans încasat</div><div class="sv" style="font-size:20px;color:var(--honey)">${fM(totAv)}</div></div>
-      <div class="sc cr"><div class="sl">Rest de încasat</div><div class="sv" style="font-size:20px;color:#fca5a5">${fM(totRst)}</div></div>
-      <div class="sc cs"><div class="sl">Cheltuieli</div><div class="sv" style="font-size:20px;color:var(--silver)">${fM(totE)}</div></div>
-    </div></div>
+    <div class="card-h">
+      <div class="card-ht">📊 Cifra de afaceri — ${lbl}</div>
+      <span style="color:var(--t3);font-size:12px">${inP.length} rezervări${pnd.length?' · <span style="color:var(--honey)">'+pnd.length+' pending</span>':''}</span>
+    </div>
+    <div style="padding:0">
+      <div class="rep-row rg">
+        <div class="rep-row-lbl">CA Brută</div>
+        <div class="rep-row-val">${fM(totR)}</div>
+      </div>
+      <div class="rep-row ry">
+        <div class="rep-row-lbl">Avans încasat</div>
+        <div class="rep-row-val">${fM(totAv)}</div>
+      </div>
+      <div class="rep-row rr">
+        <div class="rep-row-lbl">Rest de încasat</div>
+        <div class="rep-row-val">${fM(totRst)}</div>
+      </div>
+      <div class="rep-row rs">
+        <div class="rep-row-lbl">Cheltuieli</div>
+        <div class="rep-row-val">${fM(totE)}</div>
+      </div>
+    </div>
   </div>
 
+  <!-- ══ DECONT NORMAL 60/40 ══ -->
   <div class="card" style="margin-bottom:13px">
     <div class="card-h"><div class="card-ht">🧾 Decont 60/40 — ${lbl}</div><button class="btn btn-amber btn-sm np" onclick="window.print()">🖨️ Print</button></div>
     <div class="card-b" style="padding:0"><table class="tbl">
       <thead><tr><th>Categorie</th><th class="tr">CA</th><th class="tr" style="color:var(--foam)">60% Proprietar</th><th class="tr" style="color:var(--dew)">40% Administrator</th></tr></thead>
       <tbody>
         ${tRows.map(([l,k])=>`<tr><td>${l}</td><td class="tr">${fM(bT[k])}</td><td class="tr" style="color:var(--foam)">${fM(Math.round(bT[k]*SPL.o))}</td><td class="tr" style="color:var(--dew)">${fM(Math.round(bT[k]*SPL.a))}</td></tr>`).join('')}
+        ${!tRows.length?'<tr><td colspan="4" style="text-align:center;color:var(--t3);font-size:12px;padding:14px">Nicio rezervare nefacturată.</td></tr>':''}
         <tr class="trow"><td><strong>TOTAL</strong></td><td class="tr"><strong>${fM(totR)}</strong></td><td class="tr" style="color:var(--foam)"><strong>${fM(o60)}</strong></td><td class="tr" style="color:var(--dew)"><strong>${fM(a40)}</strong></td></tr>
         ${totE>0?`
         <tr style="background:rgba(42,80,96,.1)"><td style="font-size:12px;color:var(--t3)">💸 Cheltuieli (suportate proprietar)</td><td class="tr" style="color:#fca5a5;font-size:12px">— ${fM(totE)}</td><td class="tr" style="color:#fca5a5;font-size:12px">— ${fM(totE)}</td><td class="tr" style="font-size:12px;color:var(--t3)">0</td></tr>
@@ -1629,6 +1695,55 @@ function renderRep() {
     </table></div>
   </div>
 
+  <!-- ══ CA IMPOZABILĂ (facturate) ══ -->
+  ${inF.length>0?`
+  <div class="card" style="margin-bottom:13px;border-color:rgba(196,120,32,.3)">
+    <div class="card-h" style="background:rgba(196,120,32,.08);border-bottom-color:rgba(196,120,32,.25)">
+      <div class="card-ht" style="color:var(--honey)">🧾 CA Impozabilă — ${lbl}</div>
+      <span class="bdg-fact">${inF.length} facturi · TVA 11%</span>
+    </div>
+    <div style="padding:0">
+      <div class="rep-row ry">
+        <div class="rep-row-lbl">Total facturat (cu TVA)</div>
+        <div class="rep-row-val">${fM(totF)}</div>
+      </div>
+      <div class="rep-row rs">
+        <div class="rep-row-lbl">TVA 11% (extras)</div>
+        <div class="rep-row-val" style="color:var(--silver)">${fM(totFtva)}</div>
+      </div>
+      <div class="rep-row rg">
+        <div class="rep-row-lbl">Bază impozabilă (fără TVA)</div>
+        <div class="rep-row-val">${fM(totFbaza)}</div>
+      </div>
+    </div>
+    <div class="card-b" style="padding:0;border-top:1px solid rgba(196,120,32,.2)"><table class="tbl">
+      <thead><tr><th>Categorie</th><th class="tr">Total facturat</th><th class="tr">Bază (fără TVA)</th><th class="tr" style="color:var(--foam)">60% Proprietar</th><th class="tr" style="color:var(--dew)">40% Administrator</th></tr></thead>
+      <tbody>
+        ${tRowsF.map(([l,k])=>{
+          const baza=Math.round(bTf[k]/1.11*100)/100;
+          return `<tr><td>${l}</td><td class="tr" style="color:var(--honey)">${fM(bTf[k])}</td><td class="tr">${fM(baza)}</td><td class="tr" style="color:var(--foam)">${fM(Math.round(baza*SPL.o))}</td><td class="tr" style="color:var(--dew)">${fM(Math.round(baza*SPL.a))}</td></tr>`;
+        }).join('')}
+        <tr class="trow">
+          <td><strong>TOTAL</strong></td>
+          <td class="tr" style="color:var(--honey)"><strong>${fM(totF)}</strong></td>
+          <td class="tr"><strong>${fM(totFbaza)}</strong></td>
+          <td class="tr" style="color:var(--foam)"><strong>${fM(fO60)}</strong></td>
+          <td class="tr" style="color:var(--dew)"><strong>${fM(fA40)}</strong></td>
+        </tr>
+      </tbody>
+    </table></div>
+    <div style="padding:10px 16px;background:rgba(196,120,32,.05);border-top:1px solid rgba(196,120,32,.15);font-size:11px;color:var(--t3);display:flex;gap:16px;flex-wrap:wrap">
+      <span>TVA de virat: <strong style="color:var(--honey)">${fM(totFtva)}</strong></span>
+      <span style="color:rgba(90,154,170,.3)">|</span>
+      <span>Bază totală: <strong style="color:var(--dew)">${fM(totFbaza)}</strong></span>
+    </div>
+  </div>
+  `:`<div class="card" style="margin-bottom:13px;border-color:rgba(42,80,96,.3)">
+    <div class="card-h"><div class="card-ht" style="color:var(--t3)">🧾 CA Impozabilă</div></div>
+    <div style="padding:16px 18px;font-size:13px;color:var(--t3)">Nicio rezervare facturată în această perioadă.</div>
+  </div>`}
+
+  <!-- ══ PER ASSET ══ -->
   <div class="card" style="margin-bottom:13px">
     <div class="card-h"><div class="card-ht">📈 Per asset — ${lbl}</div></div>
     <div class="card-b">
@@ -1650,13 +1765,13 @@ function renderRep() {
   <div class="card">
     <div class="card-h"><div class="card-ht">👥 Oaspeți — ${lbl}</div></div>
     <div class="card-b" style="padding:0">
-    ${inP.length===0?'<p style="color:var(--t3);text-align:center;padding:18px">Nicio rezervare.</p>':`
-    <table class="tbl"><thead><tr><th>Asset</th><th>Nume</th><th>Tel</th><th>Email</th><th>CNP</th><th>Check-in</th><th>Check-out</th><th class="tr">Total</th><th>Plată</th><th>Status</th></tr></thead><tbody>
-    ${inP.sort((a,b)=>new Date(a.checkin)-new Date(b.checkin)).map(r=>{
+    ${inAll.length===0?'<p style="color:var(--t3);text-align:center;padding:18px">Nicio rezervare.</p>':`
+    <table class="tbl"><thead><tr><th>Asset</th><th>Nume</th><th>Tel</th><th>Check-in</th><th>Check-out</th><th class="tr">Total</th><th>Plată</th><th class="tc">Fact.</th><th>Status</th></tr></thead><tbody>
+    ${inAll.sort((a,b)=>new Date(a.checkin)-new Date(b.checkin)).map(r=>{
       const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';
-      return `<tr><td style="font-size:12px">${r.asset}</td><td style="font-weight:500">${getNome(r)}</td><td style="font-size:12px">${r.tel||'—'}</td><td style="font-size:12px">${r.email||'—'}</td><td style="font-size:11px;color:var(--t3)">${r.cnp||'—'}</td><td style="font-size:12px">${fD(r.checkin)}</td><td style="font-size:12px">${fD(r.checkout)}</td><td class="tr" style="font-weight:500">${r.pret?fM(r.pret):'—'}</td><td>${pi}${r.rest>0?` <span style="font-size:11px;color:var(--gold)">${fM(r.rest)}</span>`:''}</td><td>${stBdg(r)}</td></tr>`;
+      return `<tr><td style="font-size:12px">${r.asset}</td><td style="font-weight:500">${getNome(r)}</td><td style="font-size:12px">${r.tel||'—'}</td><td style="font-size:12px">${fD(r.checkin)}</td><td style="font-size:12px">${fD(r.checkout)}</td><td class="tr" style="font-weight:500">${r.pret?fM(r.pret):'—'}</td><td>${pi}${r.rest>0?` <span style="font-size:11px;color:var(--gold)">${fM(r.rest)}</span>`:''}</td><td class="tc">${r.facturat?'<span class="bdg-fact">🧾</span>':'—'}</td><td>${stBdg(r)}</td></tr>`;
     }).join('')}
-    <tr class="trow"><td colspan="7"><strong>TOTAL</strong></td><td class="tr"><strong>${fM(totR)}</strong></td><td colspan="2"></td></tr>
+    <tr class="trow"><td colspan="5"><strong>TOTAL</strong></td><td class="tr"><strong>${fM(inAll.reduce((s,r)=>s+r.pret,0))}</strong></td><td colspan="3"></td></tr>
     </tbody></table>`}
     </div>
   </div>`;
@@ -1821,6 +1936,9 @@ function openMdl(id=null, preA=null, preD=null) {
     if(r.pontonOnly) $('M_PESC_CAB').value = r.pescari||1;
     if(type==='ponton') $('M_PESC_P').value = r.pescari||1;
 
+    // Facturat
+    $('M_FACTURAT').checked = r.facturat||false;
+
     onAssetChg();
 
   } else {
@@ -1830,6 +1948,7 @@ function openMdl(id=null, preA=null, preD=null) {
     ['M_NUME','M_TEL','M_EMAIL','M_CNP','M_ACT','M_AUT','M_NOTE'].forEach(x=>$(x).value='');
     $('M_PERS').value=2; $('M_PRET').value=''; $('M_AVANS').value=''; $('M_REST').value=''; $('M_DPL').value=''; $('M_PPU').value='';
     $('M_PONTON_ONLY').checked=false; $('M_PESCARI_CAB').style.display='none';
+    $('M_FACTURAT').checked=false;
     $('M_DAYS_INFO').textContent='';
     setPay('none',false);
 
@@ -1957,6 +2076,7 @@ async function saveRes() {
     pretStd:pret, pontonOnly, pescari,
     status:$('M_STATUS').value,
     note:$('M_NOTE').value.trim(),
+    facturat:$('M_FACTURAT').checked,
   };
 
   if(eId){
