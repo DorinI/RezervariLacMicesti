@@ -1636,8 +1636,6 @@ function renderRep() {
   const s=new Date(fv);s.setHours(0,0,0,0);
   const e=new Date(tv);e.setHours(23,59,59,999);
   const lbl=`${fD(fv)} — ${fD(tv)}`;
-  // Set default date on payout form to today if already rendered
-  const poDate=$('po_date'); if(poDate&&!poDate.value) poDate.value=dStr(new Date());
 
   // Separam: nefacturate → CA normala, facturate → CA impozabila
   const inAll=RS.filter(r=>r.status!=='cancelled'&&new Date(r.checkin)>=s&&new Date(r.checkin)<=e);
@@ -1922,6 +1920,8 @@ function setPoFilter(t, btn) {
 
 function renderPayouts() {
   if(!$('payoutsBody')) return;
+  // Seteaza data default daca e prima deschidere
+  const poDate=$('po_date'); if(poDate&&!poDate.value) poDate.value=dStr(new Date());
   // Totals CUMULATIVE (all time) — for sold calculation
   const allProprietarPlata  = PAYOUTS.filter(p=>p.type==='proprietar').reduce((s,p)=>s+p.suma,0);
   const allAdminPlata       = PAYOUTS.filter(p=>p.type==='administrator').reduce((s,p)=>s+p.suma,0);
