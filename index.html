@@ -685,6 +685,19 @@ textarea.fi{resize:vertical;min-height:70px}
   @page{margin:1.5cm;size:A4}
 }
 /* ══ RAPOARTE — carduri verticale ══ */
+/* ── DECONTURI ── */
+.pout-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.pout-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--mist);background:transparent;color:var(--t3);transition:all .18s}
+.pout-tab.on{background:var(--tide);color:var(--t1);border-color:var(--shore)}
+.pout-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(42,80,96,.2);font-size:13px}
+.pout-row:last-child{border-bottom:none}
+.pout-row-date{flex:0 0 90px;font-size:11px;color:var(--t3)}
+.pout-row-type{flex:0 0 130px}
+.pout-row-note{flex:1;font-size:12px;color:var(--t3)}
+.pout-row-sum{font-weight:600;font-family:'Cormorant Garamond',serif;font-size:18px;flex:0 0 120px;text-align:right}
+.pout-row-del{flex:0 0 32px}
+.sold-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px 16px}
+@media(max-width:640px){.sold-box{grid-template-columns:1fr 1fr}#poFormRow{grid-template-columns:1fr 1fr!important}}
 .rep-row{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 18px;border-bottom:1px solid rgba(42,80,96,.25);
@@ -1080,7 +1093,7 @@ const MONTHS = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie',
 const DAYS   = ['Lu','Ma','Mi','Jo','Vi','Sâ','Du'];
 
 // State
-let RS=[], EX=[];
+let RS=[], EX=[], PAYOUTS=[];
 let pubAsset=null, pubY, pubM, selStart=null, selEnd=null;
 let admY, admM;
 let curTab='today';
@@ -1155,6 +1168,10 @@ async function loadData(silent=false) {
     if(d.ok) {
       RS = parseRS(d.rezervari);
       EX = parseEX(d.cheltuieli);
+      if(Array.isArray(d.payouts)) {
+        PAYOUTS = d.payouts.map(p=>({...p, suma:parseFloat(p.suma)||0}));
+        localStorage.setItem('lm_v4_payouts', JSON.stringify(PAYOUTS));
+      }
       localStorage.setItem('lm_v4_rs', JSON.stringify(RS));
       localStorage.setItem('lm_v4_ex', JSON.stringify(EX));
       if(!silent) toast('✓ Date actualizate');
@@ -1162,6 +1179,7 @@ async function loadData(silent=false) {
   } catch(e) {
     try { const r=localStorage.getItem('lm_v4_rs'); if(r) RS=parseRS(JSON.parse(r)); } catch(_){}
     try { const e2=localStorage.getItem('lm_v4_ex'); if(e2) EX=parseEX(JSON.parse(e2)); } catch(_){}
+    try { const p=localStorage.getItem('lm_v4_payouts'); if(p) PAYOUTS=JSON.parse(p); } catch(_){}
     if(!silent) toast('⚠ Offline — date locale','err');
   } finally {
     setSyncing(false);
@@ -1170,10 +1188,12 @@ async function loadData(silent=false) {
   }
 }
 
-async function saveRez(r)  { setSyncing(true); try { await apiPost({action:'save_rez',data:r}); } catch(e){} finally { setSyncing(false); } }
-async function delRez(id)  { setSyncing(true); try { await apiPost({action:'delete_rez',id}); } catch(e){} finally { setSyncing(false); } }
-async function saveExp(e)  { setSyncing(true); try { await apiPost({action:'save_exp',data:e}); } catch(e2){} finally { setSyncing(false); } }
-async function delExpApi(id){ setSyncing(true); try { await apiPost({action:'delete_exp',id}); } catch(e){} finally { setSyncing(false); } }
+async function saveRez(r)     { setSyncing(true); try { await apiPost({action:'save_rez',data:r}); } catch(e){} finally { setSyncing(false); } }
+async function delRez(id)     { setSyncing(true); try { await apiPost({action:'delete_rez',id}); } catch(e){} finally { setSyncing(false); } }
+async function saveExp(e)     { setSyncing(true); try { await apiPost({action:'save_exp',data:e}); } catch(e2){} finally { setSyncing(false); } }
+async function delExpApi(id)  { setSyncing(true); try { await apiPost({action:'delete_exp',id}); } catch(e){} finally { setSyncing(false); } }
+async function savePayout(p)  { setSyncing(true); try { await apiPost({action:'save_payout',data:p}); } catch(e){} finally { setSyncing(false); } }
+async function delPayoutApi(id){ setSyncing(true); try { await apiPost({action:'delete_payout',id}); } catch(e){} finally { setSyncing(false); } }
 
 // ══ PRICES ══
 function loadPR() { try { const d=localStorage.getItem('lm_v4_pr'); if(d) PR=JSON.parse(d); } catch(e){} }
@@ -1616,6 +1636,8 @@ function renderRep() {
   const s=new Date(fv);s.setHours(0,0,0,0);
   const e=new Date(tv);e.setHours(23,59,59,999);
   const lbl=`${fD(fv)} — ${fD(tv)}`;
+  // Set default date on payout form to today if empty
+  if(!$('po_date').value) $('po_date').value=dStr(new Date());
 
   // Separam: nefacturate → CA normala, facturate → CA impozabila
   const inAll=RS.filter(r=>r.status!=='cancelled'&&new Date(r.checkin)>=s&&new Date(r.checkin)<=e);
@@ -1774,7 +1796,51 @@ function renderRep() {
     <tr class="trow"><td colspan="5"><strong>TOTAL</strong></td><td class="tr"><strong>${fM(inAll.reduce((s,r)=>s+r.pret,0))}</strong></td><td colspan="3"></td></tr>
     </tbody></table>`}
     </div>
+  </div>
+
+  <!-- ══ DECONTURI & SOLD ══ -->
+  <div class="card" style="margin-top:13px;border-color:rgba(90,154,170,.25)">
+    <div class="card-h" style="background:rgba(30,61,74,.4);border-bottom-color:rgba(90,154,170,.2)">
+      <div class="card-ht" style="color:var(--foam)">💳 Deconturi & Sold</div>
+      <span style="font-size:11px;color:var(--t3)">Cumulativ — toate timpurile</span>
+    </div>
+    <div class="card-b" style="padding:13px 16px 6px">
+      <!-- Add form -->
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr 2fr auto;gap:8px;align-items:end;margin-bottom:14px;flex-wrap:wrap" class="frow" id="poFormRow">
+        <div class="fg" style="margin-bottom:0">
+          <label>Data</label>
+          <input type="date" class="fi" id="po_date" style="width:130px">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Tip</label>
+          <select class="fi" id="po_type">
+            <option value="proprietar">💼 Plată proprietar</option>
+            <option value="administrator">💰 Plată administrator</option>
+            <option value="proprietar_incasat">🏦 Încasat de proprietar</option>
+          </select>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Sumă (RON)</label>
+          <input type="number" class="fi" id="po_suma" placeholder="0" min="0">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Notă</label>
+          <input class="fi" id="po_note" placeholder="ex: cash săptămâna 1 mai...">
+        </div>
+        <button class="btn btn-moss btn-sm" onclick="addPayout()" style="margin-bottom:1px;align-self:end">＋ Adaugă</button>
+      </div>
+      <!-- Filters -->
+      <div class="pout-tabs">
+        <button class="pout-tab on" onclick="setPoFilter('all',this)">Toate</button>
+        <button class="pout-tab" onclick="setPoFilter('proprietar',this)">💼 Plăți proprietar</button>
+        <button class="pout-tab" onclick="setPoFilter('administrator',this)">💰 Plăți mie</button>
+        <button class="pout-tab" onclick="setPoFilter('proprietar_incasat',this)">🏦 Încasat de proprietar</button>
+      </div>
+    </div>
+    <div id="payoutsBody"></div>
   </div>`;
+  // Render the payouts list into the new card
+  renderPayouts();
 }
 
 // ══ CLIENTS ══
@@ -1818,6 +1884,106 @@ function renderClients() {
 function cpEmails() { const m={}; RS.forEach(r=>{if(r.email)m[r.email]=1;}); navigator.clipboard.writeText(Object.keys(m).join(', ')).then(()=>toast('✓ Emailuri copiate!')); }
 function genPromo() { $('promoTxt').value=`Bună ziua!\n\nVă mulțumim că ați ales Lacul Micești! 🎣\n\nAvem oferte speciale pentru clienții fideli.\nVă invităm să rezervați din timp pentru a beneficia de cele mai bune locuri.\n\nRezervaări online: [LINK]\nContact: [TELEFON]\n\nCu drag,\nEchipa Lacul Micești`; $('promoArea').style.display='block'; }
 function cpPromo() { navigator.clipboard.writeText($('promoTxt').value).then(()=>toast('✓ Copiat!')); }
+
+// ══ PAYOUTS (Deconturi & Sold) ══
+function savePAYOUTS() { localStorage.setItem('lm_v4_payouts', JSON.stringify(PAYOUTS)); }
+
+function addPayout() {
+  const date  = $('po_date').value;
+  const type  = $('po_type').value;
+  const suma  = parseFloat($('po_suma').value)||0;
+  const note  = $('po_note').value.trim();
+  if(!date || !suma) { toast('Completați data și suma','err'); return; }
+  const p = { id: gid(), date, type, suma, note, createdAt: new Date().toISOString() };
+  PAYOUTS.push(p);
+  savePAYOUTS();
+  $('po_suma').value = ''; $('po_note').value = '';
+  renderPayouts();
+  toast('✓ Înregistrat!');
+  savePayout(p);
+}
+
+function delPayout(id) {
+  if(!confirm('Ștergi această înregistrare?')) return;
+  PAYOUTS = PAYOUTS.filter(p=>p.id!==id);
+  savePAYOUTS();
+  renderPayouts();
+  toast('✓ Ștearsă');
+  delPayoutApi(id);
+}
+
+let poFilterType = 'all';
+function setPoFilter(t, btn) {
+  poFilterType = t;
+  document.querySelectorAll('.pout-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderPayouts();
+}
+
+function renderPayouts() {
+  // Totals CUMULATIVE (all time) — for sold calculation
+  const allProprietarPlata  = PAYOUTS.filter(p=>p.type==='proprietar').reduce((s,p)=>s+p.suma,0);
+  const allAdminPlata       = PAYOUTS.filter(p=>p.type==='administrator').reduce((s,p)=>s+p.suma,0);
+  const allProprietarIncas  = PAYOUTS.filter(p=>p.type==='proprietar_incasat').reduce((s,p)=>s+p.suma,0);
+
+  // Total CA all time (nefacturate) for sold calcul
+  const allCA = RS.filter(r=>r.status!=='cancelled'&&!r.facturat).reduce((s,r)=>s+r.pret,0);
+  const allCAF= RS.filter(r=>r.status!=='cancelled'&&r.facturat).reduce((s,r)=>{
+    const baza=Math.round(r.pret/1.11*100)/100; return s+baza;
+  },0);
+  const totalCA = allCA + allCAF;
+
+  const datoratProprietar = Math.round(totalCA * SPL.o);
+  const datoratAdmin      = Math.round(totalCA * SPL.a);
+  // Ce mai rămâne de plătit proprietarului (din ce nu a încasat deja direct)
+  const soldProprietar    = Math.max(0, datoratProprietar - allProprietarIncas - allProprietarPlata);
+  const soldAdmin         = Math.max(0, datoratAdmin - allAdminPlata);
+  // Bani în casă = ce s-a achitat (avans+rest) din rezervări minus ce s-a plătit + ce-a incasat proprietarul
+  const totalIncasat = RS.filter(r=>r.status!=='cancelled').reduce((s,r)=>s+(r.avans||0)+(r.payStatus==='paid'?(r.pret-(r.avans||0)):0),0);
+  const soldCasa = Math.max(0, totalIncasat - allProprietarPlata - allAdminPlata - allProprietarIncas);
+
+  // Filter list
+  const list = (poFilterType==='all' ? PAYOUTS : PAYOUTS.filter(p=>p.type===poFilterType))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  const typeLabel = { proprietar:'💼 Plată proprietar', administrator:'💰 Plată administrator', proprietar_incasat:'🏦 Încasat de proprietar' };
+  const typeColor = { proprietar:'var(--foam)', administrator:'var(--dew)', proprietar_incasat:'var(--honey)' };
+
+  $('payoutsBody').innerHTML = `
+    <!-- SOLD CARDS -->
+    <div class="sold-box">
+      <div class="sc" style="border:1px solid rgba(90,154,170,.25)">
+        <div class="sl">De plătit proprietar</div>
+        <div class="sv" style="color:var(--foam)">${fM(soldProprietar)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:4px">Plătit: ${fM(allProprietarPlata)} · Incasat: ${fM(allProprietarIncas)}</div>
+      </div>
+      <div class="sc" style="border:1px solid rgba(168,230,192,.15)">
+        <div class="sl">De plătit mie</div>
+        <div class="sv" style="color:var(--dew)">${fM(soldAdmin)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:4px">Plătit: ${fM(allAdminPlata)}</div>
+      </div>
+      <div class="sc" style="border:1px solid rgba(196,120,32,.25)">
+        <div class="sl">💵 Bani în casă (estimat)</div>
+        <div class="sv" style="color:var(--honey)">${fM(soldCasa)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:4px">Total încasat: ${fM(totalIncasat)}</div>
+      </div>
+    </div>
+
+    <!-- LIST -->
+    <div style="border-top:1px solid rgba(42,80,96,.3)">
+      ${!list.length
+        ? `<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">Nicio înregistrare${poFilterType!=='all'?' în această categorie':''}.</div>`
+        : list.map(p=>`
+          <div class="pout-row">
+            <div class="pout-row-date">${fD(p.date)}</div>
+            <div class="pout-row-type"><span class="bdg bdg-fog" style="color:${typeColor[p.type]};border-color:${typeColor[p.type]}33">${typeLabel[p.type]||p.type}</span></div>
+            <div class="pout-row-note">${p.note||'—'}</div>
+            <div class="pout-row-sum" style="color:${typeColor[p.type]}">${fM(p.suma)}</div>
+            <div class="pout-row-del"><button class="btn btn-ghost btn-sm" onclick="delPayout('${p.id}')">🗑</button></div>
+          </div>`).join('')
+      }
+    </div>`;
+}
 
 // ══ EXPENSES ══
 async function addExp() {
@@ -2121,6 +2287,8 @@ function expCSV() {
 
 // ══ INIT ══
 loadPR();
+// Load PAYOUTS from localStorage (fallback until API responds)
+try { const p=localStorage.getItem('lm_v4_payouts'); if(p) PAYOUTS=JSON.parse(p); } catch(_){}
 initPublic();
 // Clear old keys and load fresh from Sheets
 (async()=>{
