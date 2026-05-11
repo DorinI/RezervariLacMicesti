@@ -1636,8 +1636,8 @@ function renderRep() {
   const s=new Date(fv);s.setHours(0,0,0,0);
   const e=new Date(tv);e.setHours(23,59,59,999);
   const lbl=`${fD(fv)} — ${fD(tv)}`;
-  // Set default date on payout form to today if empty
-  if(!$('po_date').value) $('po_date').value=dStr(new Date());
+  // Set default date on payout form to today if already rendered
+  const poDate=$('po_date'); if(poDate&&!poDate.value) poDate.value=dStr(new Date());
 
   // Separam: nefacturate → CA normala, facturate → CA impozabila
   const inAll=RS.filter(r=>r.status!=='cancelled'&&new Date(r.checkin)>=s&&new Date(r.checkin)<=e);
@@ -1825,7 +1825,7 @@ function renderRep() {
         </div>
         <div class="fg" style="margin-bottom:0">
           <label>Notă</label>
-          <input class="fi" id="po_note" placeholder="ex: cash săptămâna 1 mai...">
+          <input class="fi" id="po_note" placeholder="ex: cash saptamana 1 mai...">
         </div>
         <button class="btn btn-moss btn-sm" onclick="addPayout()" style="margin-bottom:1px;align-self:end">＋ Adaugă</button>
       </div>
@@ -1921,6 +1921,7 @@ function setPoFilter(t, btn) {
 }
 
 function renderPayouts() {
+  if(!$('payoutsBody')) return;
   // Totals CUMULATIVE (all time) — for sold calculation
   const allProprietarPlata  = PAYOUTS.filter(p=>p.type==='proprietar').reduce((s,p)=>s+p.suma,0);
   const allAdminPlata       = PAYOUTS.filter(p=>p.type==='administrator').reduce((s,p)=>s+p.suma,0);
