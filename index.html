@@ -1920,57 +1920,72 @@ function setPoFilter(t, btn) {
 
 function renderPayouts() {
   if(!$('payoutsBody')) return;
-  // Seteaza data default daca e prima deschidere
   const poDate=$('po_date'); if(poDate&&!poDate.value) poDate.value=dStr(new Date());
-  // Totals CUMULATIVE (all time) — for sold calculation
-  const allProprietarPlata  = PAYOUTS.filter(p=>p.type==='proprietar').reduce((s,p)=>s+p.suma,0);
-  const allAdminPlata       = PAYOUTS.filter(p=>p.type==='administrator').reduce((s,p)=>s+p.suma,0);
-  const allProprietarIncas  = PAYOUTS.filter(p=>p.type==='proprietar_incasat').reduce((s,p)=>s+p.suma,0);
 
-  // Total CA all time (nefacturate) for sold calcul
-  const allCA = RS.filter(r=>r.status!=='cancelled'&&!r.facturat).reduce((s,r)=>s+r.pret,0);
-  const allCAF= RS.filter(r=>r.status!=='cancelled'&&r.facturat).reduce((s,r)=>{
-    const baza=Math.round(r.pret/1.11*100)/100; return s+baza;
-  },0);
-  const totalCA = allCA + allCAF;
+  // ── Aceleași formule ca în decont 60/40 (ALL TIME) ──
+  const allP = RS.filter(r=>r.status!=='cancelled'&&!r.facturat);
+  const allF = RS.filter(r=>r.status!=='cancelled'&&r.facturat);
 
-  const datoratProprietar = Math.round(totalCA * SPL.o);
-  const datoratAdmin      = Math.round(totalCA * SPL.a);
-  // Ce mai rămâne de plătit proprietarului (din ce nu a încasat deja direct)
-  const soldProprietar    = Math.max(0, datoratProprietar - allProprietarIncas - allProprietarPlata);
-  const soldAdmin         = Math.max(0, datoratAdmin - allAdminPlata);
-  // Bani în casă = ce s-a achitat (avans+rest) din rezervări minus ce s-a plătit + ce-a incasat proprietarul
-  const totalIncasat = RS.filter(r=>r.status!=='cancelled').reduce((s,r)=>s+(r.avans||0)+(r.payStatus==='paid'?(r.pret-(r.avans||0)):0),0);
-  const soldCasa = Math.max(0, totalIncasat - allProprietarPlata - allAdminPlata - allProprietarIncas);
+  // CA normală → net proprietar după cheltuieli
+  const totR_all    = allP.reduce((s,r)=>s+r.pret,0);
+  const totE_all    = EX.reduce((s,e)=>s+e.suma,0);
+  const o60_all     = Math.round(totR_all*SPL.o);
+  const a40_all     = Math.round(totR_all*SPL.a);
+  const netO_all    = Math.max(0, o60_all - totE_all);
 
-  // Filter list
-  const list = (poFilterType==='all' ? PAYOUTS : PAYOUTS.filter(p=>p.type===poFilterType))
-    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+  // CA facturată → bază fără TVA
+  const totF_all    = allF.reduce((s,r)=>s+r.pret,0);
+  const totFtva_all = Math.round(totF_all/1.11*0.11*100)/100;
+  const totFbaza_all= Math.round((totF_all-totFtva_all)*100)/100;
+  const fO60_all    = Math.round(totFbaza_all*SPL.o);
+  const fA40_all    = Math.round(totFbaza_all*SPL.a);
+
+  // TOTAL DATORAT (identic cu decont)
+  const datoratProprietar = netO_all + fO60_all;
+  const datoratAdmin      = a40_all  + fA40_all;
+
+  // Ce s-a mișcat deja
+  const platitProprietar  = PAYOUTS.filter(p=>p.type==='proprietar').reduce((s,p)=>s+p.suma,0);
+  const platitAdmin       = PAYOUTS.filter(p=>p.type==='administrator').reduce((s,p)=>s+p.suma,0);
+  const incasatProprietar = PAYOUTS.filter(p=>p.type==='proprietar_incasat').reduce((s,p)=>s+p.suma,0);
+  // Încasat direct de proprietar = echivalent plată, scade din datoria față de el
+  const acoperitProprietar= platitProprietar + incasatProprietar;
+
+  // Sold rămas
+  const soldProprietar = Math.max(0, datoratProprietar - acoperitProprietar);
+  const soldAdmin      = Math.max(0, datoratAdmin - platitAdmin);
+
+  // Bani în casă = ce a încasat TU fizic minus ce ai plătit TU
+  // (sumele încasate de proprietar nu au trecut prin tine)
+  const incasatFizic = RS.filter(r=>r.status!=='cancelled').reduce((s,r)=>s+(r.avans||0),0);
+  const soldCasa     = Math.max(0, incasatFizic - platitProprietar - platitAdmin);
 
   const typeLabel = { proprietar:'💼 Plată proprietar', administrator:'💰 Plată administrator', proprietar_incasat:'🏦 Încasat de proprietar' };
   const typeColor = { proprietar:'var(--foam)', administrator:'var(--dew)', proprietar_incasat:'var(--honey)' };
+  const list = (poFilterType==='all' ? PAYOUTS : PAYOUTS.filter(p=>p.type===poFilterType))
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
 
   $('payoutsBody').innerHTML = `
-    <!-- SOLD CARDS -->
     <div class="sold-box">
       <div class="sc" style="border:1px solid rgba(90,154,170,.25)">
         <div class="sl">De plătit proprietar</div>
         <div class="sv" style="color:var(--foam)">${fM(soldProprietar)}</div>
-        <div style="font-size:10px;color:var(--t4);margin-top:4px">Plătit: ${fM(allProprietarPlata)} · Incasat: ${fM(allProprietarIncas)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:6px">Datorat total: <strong>${fM(datoratProprietar)}</strong></div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">Plătit cash: ${fM(platitProprietar)} · Încasat direct: ${fM(incasatProprietar)}</div>
       </div>
       <div class="sc" style="border:1px solid rgba(168,230,192,.15)">
         <div class="sl">De plătit mie</div>
         <div class="sv" style="color:var(--dew)">${fM(soldAdmin)}</div>
-        <div style="font-size:10px;color:var(--t4);margin-top:4px">Plătit: ${fM(allAdminPlata)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:6px">Datorat total: <strong>${fM(datoratAdmin)}</strong></div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">Plătit: ${fM(platitAdmin)}</div>
       </div>
       <div class="sc" style="border:1px solid rgba(196,120,32,.25)">
-        <div class="sl">💵 Bani în casă (estimat)</div>
+        <div class="sl">💵 Bani în casă</div>
         <div class="sv" style="color:var(--honey)">${fM(soldCasa)}</div>
-        <div style="font-size:10px;color:var(--t4);margin-top:4px">Total încasat: ${fM(totalIncasat)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:6px">Încasat de tine: <strong>${fM(incasatFizic)}</strong></div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">Plătit total: ${fM(platitProprietar+platitAdmin)}</div>
       </div>
     </div>
-
-    <!-- LIST -->
     <div style="border-top:1px solid rgba(42,80,96,.3)">
       ${!list.length
         ? `<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">Nicio înregistrare${poFilterType!=='all'?' în această categorie':''}.</div>`
