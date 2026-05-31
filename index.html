@@ -685,19 +685,6 @@ textarea.fi{resize:vertical;min-height:70px}
   @page{margin:1.5cm;size:A4}
 }
 /* ══ RAPOARTE — carduri verticale ══ */
-/* ── DECONTURI ── */
-.pout-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
-.pout-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--mist);background:transparent;color:var(--t3);transition:all .18s}
-.pout-tab.on{background:var(--tide);color:var(--t1);border-color:var(--shore)}
-.pout-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(42,80,96,.2);font-size:13px}
-.pout-row:last-child{border-bottom:none}
-.pout-row-date{flex:0 0 90px;font-size:11px;color:var(--t3)}
-.pout-row-type{flex:0 0 130px}
-.pout-row-note{flex:1;font-size:12px;color:var(--t3)}
-.pout-row-sum{font-weight:600;font-family:'Cormorant Garamond',serif;font-size:18px;flex:0 0 120px;text-align:right}
-.pout-row-del{flex:0 0 32px}
-.sold-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px 16px}
-@media(max-width:640px){.sold-box{grid-template-columns:1fr 1fr}#poFormRow{grid-template-columns:1fr 1fr!important}}
 .rep-row{
   display:flex;align-items:center;justify-content:space-between;
   padding:14px 18px;border-bottom:1px solid rgba(42,80,96,.25);
@@ -718,6 +705,19 @@ textarea.fi{resize:vertical;min-height:70px}
 
 /* badge facturat */
 .bdg-fact{background:rgba(196,120,32,.15);color:var(--honey);border:1px solid rgba(196,120,32,.3);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.3px}
+/* ── DECONTURI ── */
+.pout-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.pout-tab{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--mist);background:transparent;color:var(--t3);transition:all .18s}
+.pout-tab.on{background:var(--tide);color:var(--t1);border-color:var(--shore)}
+.pout-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid rgba(42,80,96,.2);font-size:13px}
+.pout-row:last-child{border-bottom:none}
+.pout-row-date{flex:0 0 90px;font-size:11px;color:var(--t3)}
+.pout-row-type{flex:0 0 160px}
+.pout-row-note{flex:1;font-size:12px;color:var(--t3)}
+.pout-row-sum{font-weight:600;font-family:'Cormorant Garamond',serif;font-size:18px;flex:0 0 120px;text-align:right}
+.pout-row-del{flex:0 0 32px}
+.sold-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px 16px}
+@media(max-width:640px){.sold-box{grid-template-columns:1fr 1fr}#poFormRow{grid-template-columns:1fr 1fr!important}}
 
 @media(max-width:640px){
   .adm-main{padding:12px}
@@ -1024,13 +1024,21 @@ textarea.fi{resize:vertical;min-height:70px}
       <div class="frow"><div class="fg"><label>Rest de plată</label><input class="fi" id="M_REST" type="number" readonly></div><div class="fg"><label>Data plată integrală</label><input class="fi" id="M_DPL" type="date"></div></div>
 
       <div class="stl">Facturare</div>
-      <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(196,120,32,.06);border:1px solid rgba(196,120,32,.2);border-radius:var(--r8);cursor:pointer;margin-bottom:14px">
-        <input type="checkbox" id="M_FACTURAT" style="width:15px;height:15px;accent-color:var(--gold);flex-shrink:0">
-        <div>
-          <div style="font-size:13px;font-weight:500;color:var(--honey)">🧾 Rezervare facturată</div>
-          <div style="font-size:11px;color:var(--t3)">Suma merge în CA impozabilă · TVA 11% se calculează automat</div>
-        </div>
-      </label>
+      <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(196,120,32,.04);border:1px solid rgba(196,120,32,.15);border-radius:var(--r8);cursor:pointer" onclick="document.getElementById('M_FACTURAT').value='';this.style.borderColor='rgba(196,120,32,.15)';document.getElementById('fl_bon_eu').style.borderColor='rgba(196,120,32,.15)';document.getElementById('fl_bon_prop').style.borderColor='rgba(196,120,32,.15)'">
+          <input type="radio" name="facturat_opt" id="fl_none" value="" style="accent-color:var(--gold)" checked>
+          <div><div style="font-size:13px;font-weight:500;color:var(--t2)">💰 Încasat de mine</div><div style="font-size:11px;color:var(--t3)">Default — banii vin la tine, fără TVA</div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(196,120,32,.06);border:1px solid rgba(196,120,32,.2);border-radius:var(--r8);cursor:pointer" id="fl_bon_eu">
+          <input type="radio" name="facturat_opt" id="fl_bon_eu_r" value="bon_eu" style="accent-color:var(--gold)">
+          <div><div style="font-size:13px;font-weight:500;color:var(--honey)">🧾 Facturat — banii la mine</div><div style="font-size:11px;color:var(--t3)">Intră în CA impozabilă · TVA 11% calculat automat</div></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(90,154,170,.06);border:1px solid rgba(90,154,170,.2);border-radius:var(--r8);cursor:pointer" id="fl_bon_prop">
+          <input type="radio" name="facturat_opt" id="fl_bon_prop_r" value="bon_proprietar" style="accent-color:var(--foam)">
+          <div><div style="font-size:13px;font-weight:500;color:var(--foam)">🏦 Facturat — banii la proprietar</div><div style="font-size:11px;color:var(--t3)">Intră în CA impozabilă · banii nu trec prin tine</div></div>
+        </label>
+      </div>
+      <input type="hidden" id="M_FACTURAT">
 
       <div class="stl">Observații</div>
       <div class="fg"><textarea class="fi" id="M_NOTE" placeholder="Cerințe speciale, informații suplimentare..."></textarea></div>
@@ -1154,7 +1162,12 @@ function parseRS(arr) {
     pescari:  parseInt(r.pescari)||0,
     persoane: parseInt(r.persoane)||1,
     pontonOnly: r.pontonOnly==='true'||r.pontonOnly===true,
-    facturat:   r.facturat==='true'||r.facturat===true,
+    facturat:   (()=>{
+      if(r.facturat==='bon_eu') return 'bon_eu';
+      if(r.facturat==='bon_proprietar') return 'bon_proprietar';
+      if(r.facturat==='true'||r.facturat===true) return 'bon_eu'; // migrare silentioasa
+      return false;
+    })(),
   })).filter(r=>r.id);
 }
 function parseEX(arr) {
@@ -1639,8 +1652,10 @@ function renderRep() {
 
   // Separam: nefacturate → CA normala, facturate → CA impozabila
   const inAll=RS.filter(r=>r.status!=='cancelled'&&new Date(r.checkin)>=s&&new Date(r.checkin)<=e);
-  const inP   =inAll.filter(r=>!r.facturat);   // normale
-  const inF   =inAll.filter(r=>r.facturat);     // facturate
+  const inP   =inAll.filter(r=>!r.facturat);              // normale, banii la mine
+  const inF   =inAll.filter(r=>r.facturat);               // toate facturate
+  const inFeu =inAll.filter(r=>r.facturat==='bon_eu');     // facturat, banii la mine
+  const inFprop=inAll.filter(r=>r.facturat==='bon_proprietar'); // facturat, banii la proprietar
   const inE   =EX.filter(ex=>{const d=new Date(ex.date);d.setHours(0,0,0,0);return d>=s&&d<=e;});
 
   // CA normala
@@ -1662,13 +1677,18 @@ function renderRep() {
 
   // CA impozabila (facturate)
   const TVA_RATE = 0.11;
-  const totF    =inF.reduce((s,r)=>s+r.pret,0);          // total cu TVA
-  const totFtva =Math.round(totF/1.11*TVA_RATE*100)/100;  // TVA extras
-  const totFbaza=Math.round((totF-totFtva)*100)/100;       // baza fara TVA
+  const totF    =inF.reduce((s,r)=>s+r.pret,0);
+  const totFtva =Math.round(totF/1.11*TVA_RATE*100)/100;
+  const totFbaza=Math.round((totF-totFtva)*100)/100;
   const fO60=Math.round(totFbaza*SPL.o), fA40=Math.round(totFbaza*SPL.a);
   const bTf={cabana:0,ponton:0,sauna:0,masaj:0,pensiune:0};
   inF.forEach(r=>{const rt=r.pontonOnly?'ponton':r.type;bTf[rt]=(bTf[rt]||0)+r.pret;});
   const tRowsF=[['🏠 Cabănuțe','cabana'],['⛵ Pontoane','ponton'],['🔥 Saună & Ciubăr','sauna'],['💆 Masaj','masaj'],['🛏 Pensiune','pensiune']].filter(([,k])=>bTf[k]>0);
+  // Sub-total bon_proprietar
+  const totFprop    =inFprop.reduce((s,r)=>s+r.pret,0);
+  const totFpropTva =Math.round(totFprop/1.11*TVA_RATE*100)/100;
+  const totFpropBaza=Math.round((totFprop-totFpropTva)*100)/100;
+  const fO60prop=Math.round(totFpropBaza*SPL.o), fA40prop=Math.round(totFpropBaza*SPL.a);
 
   $('repBody').innerHTML=`
 
@@ -1737,11 +1757,22 @@ function renderRep() {
       </div>
     </div>
     <div class="card-b" style="padding:0;border-top:1px solid rgba(196,120,32,.2)"><table class="tbl">
-      <thead><tr><th>Categorie</th><th class="tr">Total facturat</th><th class="tr">Bază (fără TVA)</th><th class="tr" style="color:var(--foam)">60% Proprietar</th><th class="tr" style="color:var(--dew)">40% Administrator</th></tr></thead>
+      <thead><tr><th>Categorie</th><th class="tr">Total facturat</th><th class="tr">Bază (fără TVA)</th><th class="tr" style="color:var(--foam)">60% Prop.</th><th class="tr" style="color:var(--dew)">40% Adm.</th><th class="tr">Bani la</th></tr></thead>
       <tbody>
-        ${tRowsF.map(([l,k])=>{
-          const baza=Math.round(bTf[k]/1.11*100)/100;
-          return `<tr><td>${l}</td><td class="tr" style="color:var(--honey)">${fM(bTf[k])}</td><td class="tr">${fM(baza)}</td><td class="tr" style="color:var(--foam)">${fM(Math.round(baza*SPL.o))}</td><td class="tr" style="color:var(--dew)">${fM(Math.round(baza*SPL.a))}</td></tr>`;
+        ${inF.sort((a,b)=>new Date(a.checkin)-new Date(b.checkin)).map(r=>{
+          const baza=Math.round(r.pret/1.11*100)/100;
+          const laProp = r.facturat==='bon_proprietar';
+          const unde = laProp
+            ? `<span style="font-size:11px;color:var(--foam)">🏦 Proprietar</span>`
+            : `<span style="font-size:11px;color:var(--dew)">💰 Mine</span>`;
+          return `<tr style="${laProp?'background:rgba(90,154,170,.06)':''}">
+            <td style="font-size:12px">${r.asset}<br><span style="font-size:10px;color:var(--t3)">${getNome(r)} · ${fD(r.checkin)}</span></td>
+            <td class="tr" style="color:var(--honey)">${fM(r.pret)}</td>
+            <td class="tr">${fM(baza)}</td>
+            <td class="tr" style="color:var(--foam)">${fM(Math.round(baza*SPL.o))}</td>
+            <td class="tr" style="color:var(--dew)">${fM(Math.round(baza*SPL.a))}</td>
+            <td class="tr">${unde}</td>
+          </tr>`;
         }).join('')}
         <tr class="trow">
           <td><strong>TOTAL</strong></td>
@@ -1749,13 +1780,24 @@ function renderRep() {
           <td class="tr"><strong>${fM(totFbaza)}</strong></td>
           <td class="tr" style="color:var(--foam)"><strong>${fM(fO60)}</strong></td>
           <td class="tr" style="color:var(--dew)"><strong>${fM(fA40)}</strong></td>
+          <td></td>
         </tr>
+        ${inFprop.length>0?`
+        <tr style="background:rgba(90,154,170,.08)">
+          <td style="font-size:11px;color:var(--t3)">🏦 Din care la proprietar</td>
+          <td class="tr" style="color:var(--foam);font-size:12px">${fM(totFprop)}</td>
+          <td class="tr" style="color:var(--foam);font-size:12px">${fM(totFpropBaza)}</td>
+          <td class="tr" style="color:var(--foam);font-size:12px">${fM(fO60prop)}</td>
+          <td class="tr" style="color:var(--dew);font-size:12px">${fM(fA40prop)}</td>
+          <td></td>
+        </tr>`:''}
       </tbody>
     </table></div>
     <div style="padding:10px 16px;background:rgba(196,120,32,.05);border-top:1px solid rgba(196,120,32,.15);font-size:11px;color:var(--t3);display:flex;gap:16px;flex-wrap:wrap">
       <span>TVA de virat: <strong style="color:var(--honey)">${fM(totFtva)}</strong></span>
       <span style="color:rgba(90,154,170,.3)">|</span>
       <span>Bază totală: <strong style="color:var(--dew)">${fM(totFbaza)}</strong></span>
+      ${inFprop.length>0?`<span style="color:rgba(90,154,170,.3)">|</span><span>Încasat de proprietar: <strong style="color:var(--foam)">${fM(totFprop)}</strong></span>`:''}
     </div>
   </div>
   `:`<div class="card" style="margin-bottom:13px;border-color:rgba(42,80,96,.3)">
@@ -1789,7 +1831,7 @@ function renderRep() {
     <table class="tbl"><thead><tr><th>Asset</th><th>Nume</th><th>Tel</th><th>Check-in</th><th>Check-out</th><th class="tr">Total</th><th>Plată</th><th class="tc">Fact.</th><th>Status</th></tr></thead><tbody>
     ${inAll.sort((a,b)=>new Date(a.checkin)-new Date(b.checkin)).map(r=>{
       const pi=r.payStatus==='paid'?'🟢':r.payStatus==='avans'?'🟡':'🔴';
-      return `<tr><td style="font-size:12px">${r.asset}</td><td style="font-weight:500">${getNome(r)}</td><td style="font-size:12px">${r.tel||'—'}</td><td style="font-size:12px">${fD(r.checkin)}</td><td style="font-size:12px">${fD(r.checkout)}</td><td class="tr" style="font-weight:500">${r.pret?fM(r.pret):'—'}</td><td>${pi}${r.rest>0?` <span style="font-size:11px;color:var(--gold)">${fM(r.rest)}</span>`:''}</td><td class="tc">${r.facturat?'<span class="bdg-fact">🧾</span>':'—'}</td><td>${stBdg(r)}</td></tr>`;
+      return `<tr><td style="font-size:12px">${r.asset}</td><td style="font-weight:500">${getNome(r)}</td><td style="font-size:12px">${r.tel||'—'}</td><td style="font-size:12px">${fD(r.checkin)}</td><td style="font-size:12px">${fD(r.checkout)}</td><td class="tr" style="font-weight:500">${r.pret?fM(r.pret):'—'}</td><td>${pi}${r.rest>0?` <span style="font-size:11px;color:var(--gold)">${fM(r.rest)}</span>`:''}</td><td class="tc">${r.facturat==='bon_proprietar'?'<span class="bdg-fact" style="color:var(--foam);border-color:rgba(90,154,170,.4)">🏦</span>':r.facturat?'<span class="bdg-fact">🧾</span>':'—'}</td><td>${stBdg(r)}</td></tr>`;
     }).join('')}
     <tr class="trow"><td colspan="5"><strong>TOTAL</strong></td><td class="tr"><strong>${fM(inAll.reduce((s,r)=>s+r.pret,0))}</strong></td><td colspan="3"></td></tr>
     </tbody></table>`}
@@ -1803,41 +1845,28 @@ function renderRep() {
       <span style="font-size:11px;color:var(--t3)">Cumulativ — toate timpurile</span>
     </div>
     <div class="card-b" style="padding:13px 16px 6px">
-      <!-- Add form -->
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 2fr auto;gap:8px;align-items:end;margin-bottom:14px;flex-wrap:wrap" class="frow" id="poFormRow">
-        <div class="fg" style="margin-bottom:0">
-          <label>Data</label>
-          <input type="date" class="fi" id="po_date" style="width:130px">
-        </div>
-        <div class="fg" style="margin-bottom:0">
-          <label>Tip</label>
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr 2fr auto;gap:8px;align-items:end;margin-bottom:14px" id="poFormRow">
+        <div class="fg" style="margin-bottom:0"><label>Data</label><input type="date" class="fi" id="po_date" style="width:130px"></div>
+        <div class="fg" style="margin-bottom:0"><label>Tip</label>
           <select class="fi" id="po_type">
             <option value="proprietar">💼 Plată proprietar</option>
             <option value="administrator">💰 Plată administrator</option>
-            <option value="proprietar_incasat">🏦 Încasat de proprietar</option>
+            <option value="proprietar_incasat">🏦 Încasat proprietar (cash)</option>
           </select>
         </div>
-        <div class="fg" style="margin-bottom:0">
-          <label>Sumă (RON)</label>
-          <input type="number" class="fi" id="po_suma" placeholder="0" min="0">
-        </div>
-        <div class="fg" style="margin-bottom:0">
-          <label>Notă</label>
-          <input class="fi" id="po_note" placeholder="ex: cash saptamana 1 mai...">
-        </div>
-        <button class="btn btn-moss btn-sm" onclick="addPayout()" style="margin-bottom:1px;align-self:end">＋ Adaugă</button>
+        <div class="fg" style="margin-bottom:0"><label>Sumă (RON)</label><input type="number" class="fi" id="po_suma" placeholder="0" min="0"></div>
+        <div class="fg" style="margin-bottom:0"><label>Notă</label><input class="fi" id="po_note" placeholder="ex: cash saptamana 1 mai..."></div>
+        <button class="btn btn-moss btn-sm" onclick="addPayout()" style="align-self:end">＋ Adaugă</button>
       </div>
-      <!-- Filters -->
       <div class="pout-tabs">
         <button class="pout-tab on" onclick="setPoFilter('all',this)">Toate</button>
         <button class="pout-tab" onclick="setPoFilter('proprietar',this)">💼 Plăți proprietar</button>
         <button class="pout-tab" onclick="setPoFilter('administrator',this)">💰 Plăți mie</button>
-        <button class="pout-tab" onclick="setPoFilter('proprietar_incasat',this)">🏦 Încasat de proprietar</button>
+        <button class="pout-tab" onclick="setPoFilter('proprietar_incasat',this)">🏦 Încasat proprietar</button>
       </div>
     </div>
     <div id="payoutsBody"></div>
   </div>`;
-  // Render the payouts list into the new card
   renderPayouts();
 }
 
@@ -1895,7 +1924,7 @@ function addPayout() {
   const p = { id: gid(), date, type, suma, note, createdAt: new Date().toISOString() };
   PAYOUTS.push(p);
   savePAYOUTS();
-  $('po_suma').value = ''; $('po_note').value = '';
+  $('po_suma').value=''; $('po_note').value='';
   renderPayouts();
   toast('✓ Înregistrat!');
   savePayout(p);
@@ -1910,9 +1939,9 @@ function delPayout(id) {
   delPayoutApi(id);
 }
 
-let poFilterType = 'all';
-function setPoFilter(t, btn) {
-  poFilterType = t;
+let poFilterType='all';
+function setPoFilter(t,btn) {
+  poFilterType=t;
   document.querySelectorAll('.pout-tab').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   renderPayouts();
@@ -1923,44 +1952,48 @@ function renderPayouts() {
   const poDate=$('po_date'); if(poDate&&!poDate.value) poDate.value=dStr(new Date());
 
   // ── Aceleași formule ca în decont 60/40 (ALL TIME) ──
-  const allP = RS.filter(r=>r.status!=='cancelled'&&!r.facturat);
-  const allF = RS.filter(r=>r.status!=='cancelled'&&r.facturat);
+  const allP    = RS.filter(r=>r.status!=='cancelled'&&!r.facturat);
+  const allF    = RS.filter(r=>r.status!=='cancelled'&&r.facturat);
+  const allFprop= RS.filter(r=>r.status!=='cancelled'&&r.facturat==='bon_proprietar');
 
   // CA normală → net proprietar după cheltuieli
-  const totR_all    = allP.reduce((s,r)=>s+r.pret,0);
-  const totE_all    = EX.reduce((s,e)=>s+e.suma,0);
-  const o60_all     = Math.round(totR_all*SPL.o);
-  const a40_all     = Math.round(totR_all*SPL.a);
-  const netO_all    = Math.max(0, o60_all - totE_all);
+  const totR_all  = allP.reduce((s,r)=>s+r.pret,0);
+  const totE_all  = EX.reduce((s,e)=>s+e.suma,0);
+  const o60_all   = Math.round(totR_all*SPL.o);
+  const a40_all   = Math.round(totR_all*SPL.a);
+  const netO_all  = Math.max(0, o60_all - totE_all);
 
-  // CA facturată → bază fără TVA
-  const totF_all    = allF.reduce((s,r)=>s+r.pret,0);
-  const totFtva_all = Math.round(totF_all/1.11*0.11*100)/100;
-  const totFbaza_all= Math.round((totF_all-totFtva_all)*100)/100;
-  const fO60_all    = Math.round(totFbaza_all*SPL.o);
-  const fA40_all    = Math.round(totFbaza_all*SPL.a);
+  // CA facturată totală (bază fără TVA)
+  const totFall   = allF.reduce((s,r)=>s+r.pret,0);
+  const totFbazaAll = Math.round((totFall - Math.round(totFall/1.11*0.11*100)/100)*100)/100;
+  const fO60all   = Math.round(totFbazaAll*SPL.o);
+  const fA40all   = Math.round(totFbazaAll*SPL.a);
+
+  // CA facturată bon_proprietar (bani ce nu au trecut prin tine)
+  const totFpropAll  = allFprop.reduce((s,r)=>s+r.pret,0);
+  const totFpropBaza = Math.round((totFpropAll - Math.round(totFpropAll/1.11*0.11*100)/100)*100)/100;
+  const fO60prop     = Math.round(totFpropBaza*SPL.o);
 
   // TOTAL DATORAT (identic cu decont)
-  const datoratProprietar = netO_all + fO60_all;
-  const datoratAdmin      = a40_all  + fA40_all;
+  const datoratProprietar = netO_all + fO60all;
+  const datoratAdmin      = a40_all  + fA40all;
 
   // Ce s-a mișcat deja
   const platitProprietar  = PAYOUTS.filter(p=>p.type==='proprietar').reduce((s,p)=>s+p.suma,0);
   const platitAdmin       = PAYOUTS.filter(p=>p.type==='administrator').reduce((s,p)=>s+p.suma,0);
-  const incasatProprietar = PAYOUTS.filter(p=>p.type==='proprietar_incasat').reduce((s,p)=>s+p.suma,0);
-  // Încasat direct de proprietar = echivalent plată, scade din datoria față de el
-  const acoperitProprietar= platitProprietar + incasatProprietar;
+  const incasatCashProp   = PAYOUTS.filter(p=>p.type==='proprietar_incasat').reduce((s,p)=>s+p.suma,0);
+  // bon_proprietar = bani facturați ce au mers direct la proprietar (calculați automat din rezervări)
+  const acoperitProprietar= platitProprietar + incasatCashProp + fO60prop;
 
   // Sold rămas
   const soldProprietar = Math.max(0, datoratProprietar - acoperitProprietar);
   const soldAdmin      = Math.max(0, datoratAdmin - platitAdmin);
 
-  // Bani în casă = ce a încasat TU fizic minus ce ai plătit TU
-  // (sumele încasate de proprietar nu au trecut prin tine)
-  const incasatFizic = RS.filter(r=>r.status!=='cancelled').reduce((s,r)=>s+(r.avans||0),0);
+  // Bani în casă = ce ai încasat TU (nefacturat + bon_eu) minus ce ai plătit TU
+  const incasatFizic = RS.filter(r=>r.status!=='cancelled'&&r.facturat!=='bon_proprietar').reduce((s,r)=>s+(r.avans||0),0);
   const soldCasa     = Math.max(0, incasatFizic - platitProprietar - platitAdmin);
 
-  const typeLabel = { proprietar:'💼 Plată proprietar', administrator:'💰 Plată administrator', proprietar_incasat:'🏦 Încasat de proprietar' };
+  const typeLabel = { proprietar:'💼 Plată proprietar', administrator:'💰 Plată administrator', proprietar_incasat:'🏦 Încasat proprietar (cash)' };
   const typeColor = { proprietar:'var(--foam)', administrator:'var(--dew)', proprietar_incasat:'var(--honey)' };
   const list = (poFilterType==='all' ? PAYOUTS : PAYOUTS.filter(p=>p.type===poFilterType))
     .sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -1970,13 +2003,13 @@ function renderPayouts() {
       <div class="sc" style="border:1px solid rgba(90,154,170,.25)">
         <div class="sl">De plătit proprietar</div>
         <div class="sv" style="color:var(--foam)">${fM(soldProprietar)}</div>
-        <div style="font-size:10px;color:var(--t4);margin-top:6px">Datorat total: <strong>${fM(datoratProprietar)}</strong></div>
-        <div style="font-size:10px;color:var(--t4);margin-top:2px">Plătit cash: ${fM(platitProprietar)} · Încasat direct: ${fM(incasatProprietar)}</div>
+        <div style="font-size:10px;color:var(--t4);margin-top:6px">Datorat: <strong>${fM(datoratProprietar)}</strong></div>
+        <div style="font-size:10px;color:var(--t4);margin-top:2px">Cash plătit: ${fM(platitProprietar)} · Cash inc.: ${fM(incasatCashProp)} · Fact. prop.: ${fM(fO60prop)}</div>
       </div>
       <div class="sc" style="border:1px solid rgba(168,230,192,.15)">
         <div class="sl">De plătit mie</div>
         <div class="sv" style="color:var(--dew)">${fM(soldAdmin)}</div>
-        <div style="font-size:10px;color:var(--t4);margin-top:6px">Datorat total: <strong>${fM(datoratAdmin)}</strong></div>
+        <div style="font-size:10px;color:var(--t4);margin-top:6px">Datorat: <strong>${fM(datoratAdmin)}</strong></div>
         <div style="font-size:10px;color:var(--t4);margin-top:2px">Plătit: ${fM(platitAdmin)}</div>
       </div>
       <div class="sc" style="border:1px solid rgba(196,120,32,.25)">
@@ -2119,7 +2152,9 @@ function openMdl(id=null, preA=null, preD=null) {
     if(type==='ponton') $('M_PESC_P').value = r.pescari||1;
 
     // Facturat
-    $('M_FACTURAT').checked = r.facturat||false;
+    const fv = r.facturat||'';
+    document.querySelectorAll('input[name="facturat_opt"]').forEach(rb=>rb.checked=(rb.value===fv));
+    $('M_FACTURAT').value = fv;
 
     onAssetChg();
 
@@ -2130,7 +2165,8 @@ function openMdl(id=null, preA=null, preD=null) {
     ['M_NUME','M_TEL','M_EMAIL','M_CNP','M_ACT','M_AUT','M_NOTE'].forEach(x=>$(x).value='');
     $('M_PERS').value=2; $('M_PRET').value=''; $('M_AVANS').value=''; $('M_REST').value=''; $('M_DPL').value=''; $('M_PPU').value='';
     $('M_PONTON_ONLY').checked=false; $('M_PESCARI_CAB').style.display='none';
-    $('M_FACTURAT').checked=false;
+    document.querySelectorAll('input[name="facturat_opt"]').forEach(rb=>rb.checked=(rb.value===''));
+    $('M_FACTURAT').value='';
     $('M_DAYS_INFO').textContent='';
     setPay('none',false);
 
@@ -2258,7 +2294,7 @@ async function saveRes() {
     pretStd:pret, pontonOnly, pescari,
     status:$('M_STATUS').value,
     note:$('M_NOTE').value.trim(),
-    facturat:$('M_FACTURAT').checked,
+    facturat: document.querySelector('input[name="facturat_opt"]:checked')?.value||'',
   };
 
   if(eId){
@@ -2303,7 +2339,6 @@ function expCSV() {
 
 // ══ INIT ══
 loadPR();
-// Load PAYOUTS from localStorage (fallback until API responds)
 try { const p=localStorage.getItem('lm_v4_payouts'); if(p) PAYOUTS=JSON.parse(p); } catch(_){}
 initPublic();
 // Clear old keys and load fresh from Sheets
